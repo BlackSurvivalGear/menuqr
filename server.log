@@ -1,0 +1,6 @@
+127.0.0.1 - - [15/Jun/2026 17:55:27] "GET /restaurant.html HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 17:55:27] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 17:55:27] "GET /js/restaurant.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 17:55:27] "GET /js/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 17:55:27] "GET /js/firebase-config.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 17:55:29] "GET /login.html HTTP/1.1" 200 -
