@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ScanMenu.Africa</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <header class="dashboard-header">
+        <nav class="container">
+            <a href="index.html" class="logo">
+                <span class="text-primary">ScanMenu</span>.Africa Admin
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html" class="btn btn-outline">My Dashboard</a>
+                <button id="logout-btn" class="btn btn-outline btn-small">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="dashboard-content" style="max-width: 100%;">
+            <section class="welcome-card">
+                <h2>Administrative Dashboard</h2>
+                <p>Manage users and restaurants across the ScanMenu.Africa platform.</p>
+            </section>
+
+            <div class="admin-grid">
+                <div class="stat-card">
+                    <span id="total-users" class="stat-value">...</span>
+                    <span class="stat-label">Total Users</span>
+                </div>
+                <div class="stat-card">
+                    <span id="total-restaurants" class="stat-value">...</span>
+                    <span class="stat-label">Total Restaurants</span>
+                </div>
+                <div class="stat-card">
+                    <span id="total-menu-items" class="stat-value">...</span>
+                    <span class="stat-label">Total Menu Items</span>
+                </div>
+                <div class="stat-card">
+                    <span id="total-public-menus" class="stat-value">...</span>
+                    <span class="stat-label">Public Menus</span>
+                </div>
+            </div>
+
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="users-panel">Users</button>
+                <button class="tab-btn" data-tab="restaurants-panel">Restaurants</button>
+            </div>
+
+            <!-- Users Panel -->
+            <section id="users-panel" class="admin-section tab-content">
+                <div class="section-header">
+                    <h3>Users Management</h3>
+                    <div class="search-box">
+                        <input type="text" id="user-search" placeholder="Search by name, email or UID...">
+                    </div>
+                    <button id="export-users-btn" class="btn btn-outline btn-small">Export CSV</button>
+                </div>
+                <div class="table-container">
+                    <table id="users-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="email">Email</th>
+                                <th data-sort="username">Username</th>
+                                <th data-sort="uid">Firebase UID</th>
+                                <th data-sort="createdAt">Registration Date</th>
+                                <th data-sort="hasRestaurant">Restaurant</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Users will be injected here -->
+                            <tr><td colspan="5" style="text-align: center;">Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button id="prev-users-btn" class="btn btn-outline btn-small">Previous</button>
+                    <span id="users-page-info">Page 1</span>
+                    <button id="next-users-btn" class="btn btn-outline btn-small">Next</button>
+                </div>
+            </section>
+
+            <!-- Restaurants Panel -->
+            <section id="restaurants-panel" class="admin-section tab-content hidden">
+                <div class="section-header">
+                    <h3>Restaurants Management</h3>
+                    <div class="search-box">
+                        <input type="text" id="restaurant-search" placeholder="Search by business name or owner...">
+                    </div>
+                    <button id="export-restaurants-btn" class="btn btn-outline btn-small">Export CSV</button>
+                </div>
+                <div class="table-container">
+                    <table id="restaurants-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="businessName">Business Name</th>
+                                <th data-sort="ownerName">Owner Name</th>
+                                <th data-sort="phone">Phone</th>
+                                <th data-sort="createdAt">Date Created</th>
+                                <th data-sort="menuCount">Items</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="restaurants-table-body">
+                            <!-- Restaurants will be injected here -->
+                            <tr><td colspan="6" style="text-align: center;">Loading restaurants...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button id="prev-restaurants-btn" class="btn btn-outline btn-small">Previous</button>
+                    <span id="restaurants-page-info">Page 1</span>
+                    <button id="next-restaurants-btn" class="btn btn-outline btn-small">Next</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>

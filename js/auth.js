@@ -185,6 +185,48 @@ async function checkRestaurantProfileExists(uid) {
 }
 
 // Authentication state listener and redirection logic
+/**
+ * Checks if the current user has administrative privileges
+ * @param {string} uid
+ * @returns {Promise<boolean>}
+ */
+async function checkIsAdmin(uid) {
+    if (!uid) return false;
+    try {
+        const docRef = doc(db, "admins", uid);
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists();
+    } catch (error) {
+        console.error("Error checking admin status:", error);
+        return false;
+    }
+}
+
+/**
+ * Injects Admin Dashboard link into navigation if user is admin
+ */
+function injectAdminLink() {
+    const navContainer = document.querySelector('nav .nav-links') || document.querySelector('nav');
+    if (navContainer && !document.getElementById('admin-link')) {
+        const adminLink = document.createElement('a');
+        adminLink.id = 'admin-link';
+        adminLink.href = 'admin.html';
+        adminLink.className = 'btn btn-outline';
+        adminLink.innerText = 'Admin Dashboard';
+
+        // Find logout button to insert before it, or just append
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.parentNode.insertBefore(adminLink, logoutBtn);
+            // Add some margin to the admin link
+            adminLink.style.marginRight = '1rem';
+        } else {
+            navContainer.appendChild(adminLink);
+        }
+    }
+}
+
+// Authentication state listener and redirection logic
 onAuthStateChanged(auth, async (user) => {
     const path = window.location.pathname;
     const currentPage = path.substring(path.lastIndexOf('/') + 1) || "index.html";
@@ -194,28 +236,40 @@ onAuthStateChanged(auth, async (user) => {
 
     if (user) {
         // User is signed in
+        const isAdmin = await checkIsAdmin(user.uid);
         const profileExists = await checkRestaurantProfileExists(user.uid);
 
+        if (isAdmin) {
+            injectAdminLink();
+        }
+
         if (currentPage === "login.html" || currentPage === "index.html") {
-            if (profileExists) {
+            if (isAdmin && currentPage !== "admin.html") {
+                // Admins can go to dashboard or admin page, but let's default to dashboard if they login
+                window.location.href = "dashboard.html";
+            } else if (profileExists) {
                 window.location.href = "dashboard.html";
             } else {
                 window.location.href = "restaurant.html";
             }
         } else if (currentPage === "dashboard.html") {
-            if (!profileExists) {
+            if (!profileExists && !isAdmin) {
                 window.location.href = "restaurant.html";
             }
         } else if (currentPage === "restaurant.html") {
             const urlParams = new URLSearchParams(window.location.search);
             const isEditMode = urlParams.get('edit') === 'true';
-            if (profileExists && !isEditMode) {
+            if (profileExists && !isEditMode && !isAdmin) {
+                window.location.href = "dashboard.html";
+            }
+        } else if (currentPage === "admin.html") {
+            if (!isAdmin) {
                 window.location.href = "dashboard.html";
             }
         }
     } else {
         // User is signed out
-        if (currentPage === "dashboard.html" || currentPage === "restaurant.html") {
+        if (currentPage === "dashboard.html" || currentPage === "restaurant.html" || currentPage === "admin.html") {
             window.location.href = "login.html";
         }
     }
