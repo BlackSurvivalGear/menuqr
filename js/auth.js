@@ -13,12 +13,14 @@ import {
     setDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
 import firebaseConfig from "./firebase-config.js";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // DOM Elements for Login/Register
 const authForm = document.getElementById("auth-form");
@@ -45,7 +47,7 @@ function setAuthMode(isRegister) {
     isRegisterMode = isRegister;
     if (isRegisterMode) {
         authTitle.innerText = "Create Account";
-        authSubtitle.innerText = "Join ScanMenuQR today!";
+        authSubtitle.innerText = "Join ScanMenu.Africa today!";
         btnText.innerText = "Create Account";
         toggleAuthBtn.innerText = "Sign In";
         const switchTextEl = document.getElementById("switch-text");
@@ -221,4 +223,4 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-export { auth, db, signOut };
+export { auth, db, storage, signOut };

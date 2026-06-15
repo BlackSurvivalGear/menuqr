@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Profile - ScanMenuQR</title>
+    <title>Restaurant Profile - ScanMenu.Africa</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-light">
     <header class="dashboard-header">
         <nav class="container">
-            <div class="logo">ScanMenuQR</div>
+            <a href="index.html" class="logo">
+                <span class="text-primary">ScanMenu</span>.Africa
+            </a>
             <button id="logout-btn" class="btn btn-outline btn-small">Logout</button>
         </nav>
     </header>
@@ -21,6 +23,22 @@
                 <p id="page-subtitle">Please provide your business details to get started.</p>
 
                 <form id="restaurant-form">
+                    <div class="form-group">
+                        <label for="restaurant-logo">Restaurant Logo</label>
+                        <div class="logo-upload-container">
+                            <div id="logo-preview-container" class="logo-preview-box">
+                                <span class="text-muted">No logo</span>
+                            </div>
+                            <div class="logo-upload-controls">
+                                <input type="file" id="restaurant-logo" accept="image/png, image/jpeg, image/webp" class="hidden">
+                                <button type="button" id="select-logo-btn" class="btn btn-outline btn-small">Select Logo</button>
+                                <p class="text-muted" style="font-size: 0.75rem; margin-top: 0.5rem;">PNG, JPG, WEBP (Max 2MB)</p>
+                            </div>
+                        </div>
+                        <div id="upload-progress-container" class="progress-container hidden">
+                            <div id="upload-progress-bar" class="progress-bar"></div>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="businessName">Business Name</label>
                         <input type="text" id="businessName" required placeholder="e.g. The Italian Bistro">

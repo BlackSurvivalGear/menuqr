@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - ScanMenuQR</title>
+    <title>Dashboard - ScanMenu.Africa</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-light">
     <header class="dashboard-header">
         <nav class="container">
-            <div class="logo">ScanMenuQR</div>
+            <a href="index.html" class="logo">
+                <span class="text-primary">ScanMenu</span>.Africa
+            </a>
             <button id="logout-btn" class="btn btn-outline btn-small">Logout</button>
         </nav>
     </header>
@@ -74,7 +76,7 @@
         <div class="dashboard-content">
             <section class="welcome-card">
                 <h2>Welcome, <span id="user-display-email">User</span>!</h2>
-                <p>You are successfully logged in to your ScanMenuQR dashboard.</p>
+                <p>You are successfully logged in to your ScanMenu.Africa dashboard.</p>
             </section>
 
             <section id="restaurant-details" class="account-details">
@@ -128,10 +130,6 @@
                     </div>
 
                     <div id="qr-details" class="qr-details hidden">
-                        <div class="detail-item">
-                            <span class="label">Restaurant:</span>
-                            <span id="qr-biz-name" class="value">-</span>
-                        </div>
                         <div class="detail-item">
                             <span class="label">Menu Link:</span>
                             <span id="qr-public-url" class="value">-</span>

@@ -57,7 +57,7 @@ onAuthStateChanged(auth, async (user) => {
                 initMenuItems(user.uid);
 
                 // Initialize QR Code management
-                initQRManager(user.uid, restData.businessName);
+                initQRManager(user.uid, restData.businessName, restData.logoUrl);
             } else {
                 // If profile doesn't exist, redirection in auth.js will handle it
                 // but we can set friendly messages just in case
