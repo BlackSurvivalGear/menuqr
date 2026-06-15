@@ -7,6 +7,14 @@ const userDisplayEmailEl = document.getElementById("user-display-email");
 const userUidEl = document.getElementById("user-uid");
 const userCreatedAtEl = document.getElementById("user-created-at");
 
+// Restaurant elements
+const bizNameEl = document.getElementById("biz-name");
+const ownerNameEl = document.getElementById("owner-name");
+const bizPhoneEl = document.getElementById("biz-phone");
+const bizWhatsappEl = document.getElementById("biz-whatsapp");
+const bizAddressEl = document.getElementById("biz-address");
+const editProfileBtn = document.getElementById("edit-profile-btn");
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         // User is signed in, fetch Firestore data
@@ -15,6 +23,7 @@ onAuthStateChanged(auth, async (user) => {
             userDisplayEmailEl.innerText = user.email.split('@')[0];
             userUidEl.innerText = user.uid;
 
+            // Fetch User Account Info
             const userDocRef = doc(db, "users", user.uid);
             const userDoc = await getDoc(userDocRef);
 
@@ -27,12 +36,39 @@ onAuthStateChanged(auth, async (user) => {
                     userCreatedAtEl.innerText = "N/A";
                 }
             } else {
-                console.error("No such document in Firestore!");
                 userCreatedAtEl.innerText = "Not found in records";
             }
+
+            // Fetch Restaurant Profile Info
+            const restDocRef = doc(db, "restaurants", user.uid);
+            const restDoc = await getDoc(restDocRef);
+
+            if (restDoc.exists()) {
+                const restData = restDoc.data();
+                bizNameEl.innerText = restData.businessName || "N/A";
+                ownerNameEl.innerText = restData.ownerName || "N/A";
+                bizPhoneEl.innerText = restData.phone || "N/A";
+                bizWhatsappEl.innerText = restData.whatsapp || "N/A";
+                bizAddressEl.innerText = restData.address || "N/A";
+            } else {
+                // If profile doesn't exist, redirection in auth.js will handle it
+                // but we can set friendly messages just in case
+                bizNameEl.innerText = "No profile found";
+                ownerNameEl.innerText = "No profile found";
+                bizPhoneEl.innerText = "No profile found";
+                bizWhatsappEl.innerText = "No profile found";
+                bizAddressEl.innerText = "No profile found";
+            }
         } catch (error) {
-            console.error("Error fetching user data:", error);
-            userCreatedAtEl.innerText = "Error loading date";
+            console.error("Error fetching data:", error);
+            userCreatedAtEl.innerText = "Error loading";
+            bizNameEl.innerText = "Error loading";
         }
     }
 });
+
+if (editProfileBtn) {
+    editProfileBtn.addEventListener("click", () => {
+        window.location.href = "restaurant.html?edit=true";
+    });
+}

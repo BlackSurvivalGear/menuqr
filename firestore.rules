@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // User profile rules
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Restaurant profile rules
+    match /restaurants/{uid} {
+      // Allow create, read, and update if the user is the owner
+      allow create, read, update: if request.auth != null && request.auth.uid == uid;
+
+      // Explicitly deny delete
+      allow delete: if false;
+    }
+  }
+}
