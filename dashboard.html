@@ -14,6 +14,62 @@
         </nav>
     </header>
 
+    <div id="menu-item-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Menu Item</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form id="menu-item-form">
+                <input type="hidden" id="item-id">
+                <div class="form-group">
+                    <label for="item-name">Item Name *</label>
+                    <input type="text" id="item-name" required placeholder="e.g. Jollof Rice">
+                </div>
+                <div class="form-group">
+                    <label for="item-description">Description</label>
+                    <textarea id="item-description" rows="3" placeholder="Optional description..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="item-price">Price *</label>
+                    <input type="number" id="item-price" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label for="item-category">Category</label>
+                    <select id="item-category">
+                        <option value="Breakfast">Breakfast</option>
+                        <option value="Lunch">Lunch</option>
+                        <option value="Dinner">Dinner</option>
+                        <option value="Drinks">Drinks</option>
+                        <option value="Desserts">Desserts</option>
+                        <option value="Sides">Sides</option>
+                        <option value="Specials">Specials</option>
+                        <option value="Other">Other</option>
+                        <option value="custom">-- Custom Category --</option>
+                    </select>
+                </div>
+                <div id="custom-category-group" class="form-group hidden">
+                    <label for="custom-category">Custom Category Name</label>
+                    <input type="text" id="custom-category" placeholder="Enter custom category">
+                </div>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="item-available" checked> Available
+                    </label>
+                </div>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="item-featured"> Featured Item
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancel-item-btn" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <main class="container">
         <div class="dashboard-content">
             <section class="welcome-card">
@@ -48,17 +104,16 @@
                 </div>
             </section>
 
-            <section id="menu-categories-section" class="account-details" style="margin-top: 1.5rem;">
+            <section id="menu-builder-section" class="account-details" style="margin-top: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="margin-bottom: 0;">Menu Categories</h3>
-                    <button id="add-category-btn" class="btn btn-primary btn-small">Add Category</button>
+                    <h3 style="margin-bottom: 0;">Menu Builder</h3>
+                    <button id="add-menu-item-btn" class="btn btn-primary btn-small">+ Add Menu Item</button>
                 </div>
-                <div id="categories-list-container">
-                    <ol id="categories-list" style="padding-left: 1.5rem;">
-                        <!-- Categories will be injected here -->
-                    </ol>
+                <div id="menu-items-list" class="menu-items-grid">
+                    <!-- Menu items will be injected here -->
+                    <p class="text-muted">No menu items added yet. Click the button above to create your first item!</p>
                 </div>
-                <div id="category-error" class="error-box hidden"></div>
+                <div id="menu-error" class="error-box hidden"></div>
             </section>
 
             <section class="account-details" style="margin-top: 1.5rem;">
