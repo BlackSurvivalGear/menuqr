@@ -2,6 +2,7 @@ import { auth, db } from "./auth.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { initMenuItems } from "./menu-items.js";
+import { initQRManager } from "./qr-manager.js";
 
 const userEmailEl = document.getElementById("user-email");
 const userDisplayEmailEl = document.getElementById("user-display-email");
@@ -54,6 +55,9 @@ onAuthStateChanged(auth, async (user) => {
 
                 // Initialize menu items management
                 initMenuItems(user.uid);
+
+                // Initialize QR Code management
+                initQRManager(user.uid, restData.businessName);
             } else {
                 // If profile doesn't exist, redirection in auth.js will handle it
                 // but we can set friendly messages just in case
