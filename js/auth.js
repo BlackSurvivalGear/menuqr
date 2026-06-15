@@ -9,6 +9,7 @@ import {
 import {
     getFirestore,
     doc,
+    getDoc,
     setDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
@@ -167,8 +168,24 @@ if (logoutBtn) {
     });
 }
 
+/**
+ * Checks if a restaurant profile exists for the given UID
+ * @param {string} uid
+ * @returns {Promise<boolean>}
+ */
+async function checkRestaurantProfileExists(uid) {
+    try {
+        const docRef = doc(db, "restaurants", uid);
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists();
+    } catch (error) {
+        console.error("Error checking restaurant profile:", error);
+        return false;
+    }
+}
+
 // Authentication state listener and redirection logic
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     const path = window.location.pathname;
     const currentPage = path.substring(path.lastIndexOf('/') + 1) || "index.html";
 
@@ -177,13 +194,28 @@ onAuthStateChanged(auth, (user) => {
 
     if (user) {
         // User is signed in
+        const profileExists = await checkRestaurantProfileExists(user.uid);
+
         if (currentPage === "login.html" || currentPage === "index.html") {
-            window.location.href = "dashboard.html";
+            if (profileExists) {
+                window.location.href = "dashboard.html";
+            } else {
+                window.location.href = "restaurant.html";
+            }
+        } else if (currentPage === "dashboard.html") {
+            if (!profileExists) {
+                window.location.href = "restaurant.html";
+            }
+        } else if (currentPage === "restaurant.html") {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isEditMode = urlParams.get('edit') === 'true';
+            if (profileExists && !isEditMode) {
+                window.location.href = "dashboard.html";
+            }
         }
     } else {
         // User is signed out
-        if (currentPage === "dashboard.html") {
-            // Requirement: unauthenticated users accessing dashboard.html must be redirected to login.html
+        if (currentPage === "dashboard.html" || currentPage === "restaurant.html") {
             window.location.href = "login.html";
         }
     }

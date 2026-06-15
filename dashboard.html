@@ -21,7 +21,34 @@
                 <p>You are successfully logged in to your ScanMenuQR dashboard.</p>
             </section>
 
-            <section class="account-details">
+            <section id="restaurant-details" class="account-details">
+                <h3>Restaurant Profile</h3>
+                <div class="detail-item">
+                    <span class="label">Business Name:</span>
+                    <span id="biz-name" class="value">Loading...</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Owner Name:</span>
+                    <span id="owner-name" class="value">Loading...</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Phone:</span>
+                    <span id="biz-phone" class="value">Loading...</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">WhatsApp:</span>
+                    <span id="biz-whatsapp" class="value">Loading...</span>
+                </div>
+                <div class="detail-item" style="flex-direction: column; align-items: flex-start;">
+                    <span class="label">Address:</span>
+                    <span id="biz-address" class="value" style="margin-top: 0.5rem;">Loading...</span>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <button id="edit-profile-btn" class="btn btn-outline btn-full">Edit Restaurant Profile</button>
+                </div>
+            </section>
+
+            <section class="account-details" style="margin-top: 1.5rem;">
                 <h3>Account Information</h3>
                 <div class="detail-item">
                     <span class="label">Email Address:</span>
