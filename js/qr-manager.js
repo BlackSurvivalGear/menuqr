@@ -31,7 +31,7 @@ export function initQRManager(uid, businessName) {
 
     currentUid = uid;
     currentBizName = businessName || "Restaurant";
-    publicMenuUrl = `https://blacksurvivalgear.github.io/menuqr/menu.html?id=${uid}`;
+    publicMenuUrl = `https://www.scanmenu.africa/menu.html?id=${uid}`;
 
     if (generateBtn) {
         generateBtn.addEventListener("click", handleGenerateQR);
