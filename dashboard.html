@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ScanMenuQR</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+    <header class="dashboard-header">
+        <nav class="container">
+            <div class="logo">ScanMenuQR</div>
+            <button id="logout-btn" class="btn btn-outline btn-small">Logout</button>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="dashboard-content">
+            <section class="welcome-card">
+                <h2>Welcome, <span id="user-display-email">User</span>!</h2>
+                <p>You are successfully logged in to your ScanMenuQR dashboard.</p>
+            </section>
+
+            <section class="account-details">
+                <h3>Account Information</h3>
+                <div class="detail-item">
+                    <span class="label">Email Address:</span>
+                    <span id="user-email" class="value">Loading...</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">User UID:</span>
+                    <span id="user-uid" class="value">Loading...</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Created At:</span>
+                    <span id="user-created-at" class="value">Loading...</span>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>
