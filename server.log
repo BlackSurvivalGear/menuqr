@@ -1,6 +1,7 @@
-127.0.0.1 - - [15/Jun/2026 17:55:27] "GET /restaurant.html HTTP/1.1" 200 -
-127.0.0.1 - - [15/Jun/2026 17:55:27] "GET /css/style.css HTTP/1.1" 200 -
-127.0.0.1 - - [15/Jun/2026 17:55:27] "GET /js/restaurant.js HTTP/1.1" 200 -
-127.0.0.1 - - [15/Jun/2026 17:55:27] "GET /js/auth.js HTTP/1.1" 200 -
-127.0.0.1 - - [15/Jun/2026 17:55:27] "GET /js/firebase-config.js HTTP/1.1" 200 -
-127.0.0.1 - - [15/Jun/2026 17:55:29] "GET /login.html HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 18:17:31] "GET /login.html HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 18:17:31] "GET /js/auth.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 18:17:31] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 18:17:31] "GET /js/firebase-config.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 18:17:32] "GET /dashboard.html HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 18:17:32] "GET /js/dashboard.js HTTP/1.1" 200 -
+127.0.0.1 - - [15/Jun/2026 18:17:32] "GET /js/categories.js HTTP/1.1" 200 -
