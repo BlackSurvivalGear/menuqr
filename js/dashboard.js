@@ -1,7 +1,7 @@
 import { auth, db } from "./auth.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-import { initCategories } from "./categories.js";
+import { initMenuItems } from "./menu-items.js";
 
 const userEmailEl = document.getElementById("user-email");
 const userDisplayEmailEl = document.getElementById("user-display-email");
@@ -52,8 +52,8 @@ onAuthStateChanged(auth, async (user) => {
                 bizWhatsappEl.innerText = restData.whatsapp || "N/A";
                 bizAddressEl.innerText = restData.address || "N/A";
 
-                // Initialize categories management
-                initCategories(user.uid);
+                // Initialize menu items management
+                initMenuItems(user.uid);
             } else {
                 // If profile doesn't exist, redirection in auth.js will handle it
                 // but we can set friendly messages just in case
