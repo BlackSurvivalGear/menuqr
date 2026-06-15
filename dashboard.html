@@ -116,6 +116,40 @@
                 <div id="menu-error" class="error-box hidden"></div>
             </section>
 
+            <section id="qr-code-section" class="account-details" style="margin-top: 1.5rem;">
+                <h3>QR Code</h3>
+                <p>Print this QR code and place it on restaurant tables so customers can instantly access your menu.</p>
+
+                <div class="qr-container">
+                    <div id="qr-preview-container" class="qr-preview-box">
+                        <div class="qr-placeholder">
+                            <p>No QR Code Generated</p>
+                        </div>
+                    </div>
+
+                    <div id="qr-details" class="qr-details hidden">
+                        <div class="detail-item">
+                            <span class="label">Restaurant:</span>
+                            <span id="qr-biz-name" class="value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Menu Link:</span>
+                            <span id="qr-public-url" class="value">-</span>
+                        </div>
+                    </div>
+
+                    <div class="qr-actions">
+                        <button id="generate-qr-btn" class="btn btn-primary btn-full">Generate QR Code</button>
+                        <div id="qr-download-actions" class="hidden" style="gap: 0.5rem; margin-top: 0.5rem;">
+                            <button id="download-qr-btn" class="btn btn-outline" style="flex: 1;">Download PNG</button>
+                            <button id="copy-link-btn" class="btn btn-outline" style="flex: 1;">Copy Menu Link</button>
+                        </div>
+                    </div>
+                    <div id="qr-message" class="error-box hidden" style="background-color: #dcfce7; color: #166534; border-color: #bbf7d0;"></div>
+                    <div id="qr-error" class="error-box hidden"></div>
+                </div>
+            </section>
+
             <section class="account-details" style="margin-top: 1.5rem;">
                 <h3>Account Information</h3>
                 <div class="detail-item">
