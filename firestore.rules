@@ -8,8 +8,11 @@ service cloud.firestore {
 
     // Restaurant profile rules
     match /restaurants/{uid} {
-      // Allow create, read, and update if the user is the owner
-      allow create, read, update: if request.auth != null && request.auth.uid == uid;
+      // Allow public read access for menu display
+      allow read: if true;
+
+      // Allow create and update if the user is the owner
+      allow create, update: if request.auth != null && request.auth.uid == uid;
 
       // Explicitly deny delete
       allow delete: if false;
@@ -23,8 +26,12 @@ service cloud.firestore {
 
     // Menu Item rules
     match /menuItems/{itemId} {
+      // Allow public read access for menu display
+      allow read: if true;
+
+      // Owner write access
       allow create: if request.auth != null && request.resource.data.restaurantId == request.auth.uid;
-      allow read, update, delete: if request.auth != null && resource.data.restaurantId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.restaurantId == request.auth.uid;
     }
   }
 }
