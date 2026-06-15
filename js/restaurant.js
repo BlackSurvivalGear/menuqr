@@ -18,7 +18,7 @@ const pageTitle = document.getElementById("page-title");
 const cancelBtn = document.getElementById("cancel-btn");
 
 let isEditMode = false;
-let currentUser = null;
+let existingCreatedAt = null;
 
 // Form fields
 const businessNameInput = document.getElementById("businessName");
@@ -29,41 +29,43 @@ const addressInput = document.getElementById("address");
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        currentUser = user;
         const urlParams = new URLSearchParams(window.location.search);
         isEditMode = urlParams.get('edit') === 'true';
 
-        if (isEditMode) {
-            setupEditMode();
-        } else {
-            // Check if profile already exists, if so redirect to dashboard (unless explicitly editing)
-            const docRef = doc(db, "restaurants", user.uid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
+        // Check if profile already exists
+        const docRef = doc(db, "restaurants", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            existingCreatedAt = data.createdAt;
+
+            if (isEditMode) {
+                setupEditMode(data);
+            } else {
+                // If profile already exists and not explicitly editing, redirect to dashboard
                 window.location.href = "dashboard.html";
             }
+        } else if (isEditMode) {
+            // If edit mode requested but no profile exists, treat as new setup
+            isEditMode = false;
+            pageTitle.innerText = "Restaurant Profile Setup";
         }
     } else {
         window.location.href = "login.html";
     }
 });
 
-async function setupEditMode() {
+async function setupEditMode(data) {
     pageTitle.innerText = "Edit Restaurant Profile";
     cancelBtn.classList.remove("hidden");
 
     try {
-        const docRef = doc(db, "restaurants", currentUser.uid);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            businessNameInput.value = data.businessName || "";
-            ownerNameInput.value = data.ownerName || "";
-            phoneInput.value = data.phone || "";
-            whatsappInput.value = data.whatsapp || "";
-            addressInput.value = data.address || "";
-        }
+        businessNameInput.value = data.businessName || "";
+        ownerNameInput.value = data.ownerName || "";
+        phoneInput.value = data.phone || "";
+        whatsappInput.value = data.whatsapp || "";
+        addressInput.value = data.address || "";
     } catch (error) {
         console.error("Error fetching restaurant data:", error);
         showError("Failed to load restaurant profile.");
@@ -104,24 +106,32 @@ restaurantForm.addEventListener("submit", async (e) => {
     submitBtn.disabled = true;
 
     try {
+        if (!auth.currentUser) {
+            showError("You must be logged in to save a profile.");
+            return;
+        }
+
         const restaurantData = {
-            ownerUid: currentUser.uid,
+            ownerUid: auth.currentUser.uid,
             businessName,
             ownerName,
             phone,
             whatsapp,
             address,
+            createdAt: isEditMode ? existingCreatedAt : serverTimestamp(),
             updatedAt: serverTimestamp()
         };
 
-        const docRef = doc(db, "restaurants", currentUser.uid);
-
-        if (isEditMode) {
-            await updateDoc(docRef, restaurantData);
-        } else {
+        // Ensure createdAt is never null if we're in edit mode but it was missing
+        if (isEditMode && !restaurantData.createdAt) {
             restaurantData.createdAt = serverTimestamp();
-            await setDoc(docRef, restaurantData);
         }
+
+        const docRef = doc(db, "restaurants", auth.currentUser.uid);
+
+        // Use setDoc for both creation and updates to ensure all fields are written
+        // and to comply with the requirement of using the UID as the document ID.
+        await setDoc(docRef, restaurantData);
 
         showSuccess("Profile saved successfully! Redirecting...");
 
