@@ -13,6 +13,7 @@ const errorScreen = document.getElementById("error-screen");
 const menuContent = document.getElementById("menu-content");
 
 const resName = document.getElementById("res-name");
+const resLogoContainer = document.getElementById("res-logo-container");
 const resAddress = document.getElementById("res-address");
 const resWhatsapp = document.getElementById("res-whatsapp");
 
@@ -87,6 +88,23 @@ async function fetchMenuItems(uid) {
  */
 function renderRestaurantDetails(data) {
     if (resName) resName.textContent = data.businessName || "Restaurant";
+
+    if (resLogoContainer) {
+        if (data.logoUrl) {
+            const img = document.createElement("img");
+            img.src = data.logoUrl;
+            img.alt = `${data.businessName} Logo`;
+            img.className = "restaurant-logo-img";
+            resLogoContainer.appendChild(img);
+        } else {
+            // ScanMenu.Africa Placeholder
+            const placeholder = document.createElement("div");
+            placeholder.className = "logo-placeholder";
+            placeholder.textContent = (data.businessName || "S").charAt(0).toUpperCase();
+            resLogoContainer.appendChild(placeholder);
+        }
+    }
+
     if (resAddress) resAddress.textContent = data.address || "";
 
     if (data.whatsapp && resWhatsapp) {

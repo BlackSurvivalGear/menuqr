@@ -19,18 +19,21 @@ const qrError = document.getElementById("qr-error");
 
 let currentUid = null;
 let currentBizName = "restaurant";
+let currentLogoUrl = null;
 let publicMenuUrl = "";
 
 /**
  * Initialize the QR Manager
  * @param {string} uid - Authenticated user UID
  * @param {string} businessName - Restaurant business name
+ * @param {string} logoUrl - Restaurant logo URL
  */
-export function initQRManager(uid, businessName) {
+export function initQRManager(uid, businessName, logoUrl) {
     if (!uid) return;
 
     currentUid = uid;
     currentBizName = businessName || "Restaurant";
+    currentLogoUrl = logoUrl || null;
     publicMenuUrl = `https://www.scanmenu.africa/menu.html?id=${uid}`;
 
     if (generateBtn) {
@@ -49,7 +52,7 @@ export function initQRManager(uid, businessName) {
 /**
  * Handle QR Code Generation
  */
-function handleGenerateQR() {
+async function handleGenerateQR() {
     try {
         hideFeedback();
 
@@ -89,6 +92,11 @@ function handleGenerateQR() {
         }
         ctx.restore();
 
+        // Embed Logo if exists
+        if (currentLogoUrl) {
+            await embedLogoInCanvas(canvas, currentLogoUrl);
+        }
+
         // Update UI
         qrPreviewContainer.innerHTML = "";
         qrPreviewContainer.appendChild(canvas);
@@ -106,15 +114,129 @@ function handleGenerateQR() {
 }
 
 /**
- * Handle PNG Download
+ * Embed logo in the center of the QR canvas
+ * @param {HTMLCanvasElement} canvas
+ * @param {string} logoUrl
  */
-function handleDownloadPNG() {
+function embedLogoInCanvas(canvas, logoUrl) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            const ctx = canvas.getContext('2d');
+            const qrWidth = canvas.width;
+            const qrHeight = canvas.height;
+
+            // Logo size: max 20% of QR width
+            const logoSize = qrWidth * 0.2;
+            const x = (qrWidth - logoSize) / 2;
+            const y = (qrHeight - logoSize) / 2;
+
+            // White circular background
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(qrWidth / 2, qrHeight / 2, (logoSize / 2) + 2, 0, Math.PI * 2);
+            ctx.fillStyle = "white";
+            ctx.fill();
+
+            // Circular clip for logo
+            ctx.beginPath();
+            ctx.arc(qrWidth / 2, qrHeight / 2, logoSize / 2, 0, Math.PI * 2);
+            ctx.clip();
+
+            ctx.drawImage(img, x, y, logoSize, logoSize);
+            ctx.restore();
+            resolve();
+        };
+        img.onerror = () => {
+            console.warn("Could not load logo for QR embedding");
+            resolve(); // Still resolve to show QR without logo
+        };
+        img.src = logoUrl;
+    });
+}
+
+/**
+ * Handle PNG Download
+ * Generates a professionally designed QR card.
+ */
+async function handleDownloadPNG() {
     try {
-        const canvas = qrPreviewContainer.querySelector("canvas");
-        if (!canvas) {
+        const qrCanvas = qrPreviewContainer.querySelector("canvas");
+        if (!qrCanvas) {
             showError("Please generate a QR code first.");
             return;
         }
+
+        // Create a higher resolution canvas for the card
+        const cardWidth = 800;
+        const cardHeight = 1200;
+        const canvas = document.createElement("canvas");
+        canvas.width = cardWidth;
+        canvas.height = cardHeight;
+        const ctx = canvas.getContext("2d");
+
+        // Fill background
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, cardWidth, cardHeight);
+
+        let currentY = 100;
+
+        // 1. Restaurant Logo
+        if (currentLogoUrl) {
+            await new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => {
+                    const logoSize = 180;
+                    const x = (cardWidth - logoSize) / 2;
+                    ctx.drawImage(img, x, currentY, logoSize, logoSize);
+                    currentY += logoSize + 40;
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.warn("Could not load logo for QR card");
+                    resolve();
+                };
+                img.src = currentLogoUrl;
+            });
+        } else {
+            // Placeholder if no logo
+            ctx.fillStyle = "#008751";
+            ctx.beginPath();
+            ctx.arc(cardWidth / 2, currentY + 90, 90, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.font = "bold 80px Inter, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(currentBizName.charAt(0).toUpperCase(), cardWidth / 2, currentY + 90);
+            currentY += 180 + 40;
+        }
+
+        // 2. Restaurant Name
+        ctx.fillStyle = "#111827";
+        ctx.font = "bold 56px Inter, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(currentBizName, cardWidth / 2, currentY);
+        currentY += 100;
+
+        // 3. QR Code
+        const qrDisplaySize = 500;
+        const qrX = (cardWidth - qrDisplaySize) / 2;
+        ctx.drawImage(qrCanvas, qrX, currentY, qrDisplaySize, qrDisplaySize);
+        currentY += qrDisplaySize + 60;
+
+        // 4. Instruction text
+        ctx.fillStyle = "#6B7280";
+        ctx.font = "500 36px Inter, sans-serif";
+        ctx.fillText("Scan to view our menu", cardWidth / 2, currentY);
+        currentY += 120;
+
+        // 5. Powered by attribution
+        ctx.fillStyle = "#9CA3AF";
+        ctx.font = "400 24px Inter, sans-serif";
+        ctx.fillText("Powered by ScanMenu.Africa", cardWidth / 2, cardHeight - 60);
 
         // Sanitize business name for filename
         const sanitizedName = currentBizName
@@ -128,7 +250,7 @@ function handleDownloadPNG() {
         // Create download link
         const link = document.createElement("a");
         link.download = filename;
-        link.href = canvas.toDataURL("image/png");
+        link.href = canvas.toDataURL("image/png", 1.0);
         link.click();
     } catch (error) {
         console.error("Download Error:", error);
