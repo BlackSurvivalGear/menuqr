@@ -1,4 +1,4 @@
-import { db } from "./auth.js";
+import { auth, db } from "./auth.js";
 import {
     collection,
     doc,
@@ -146,6 +146,13 @@ async function handleFormSubmit(e) {
         updatedAt: serverTimestamp()
     };
 
+    // Debug logging
+    console.log("auth.currentUser.uid:", auth.currentUser ? auth.currentUser.uid : "null");
+    console.log("menu item payload:", itemData);
+    console.log("restaurantId value:", itemData.restaurantId);
+    console.log("price value:", itemData.price);
+    console.log("price type:", typeof itemData.price);
+
     try {
         if (itemId) {
             // Update
@@ -161,8 +168,9 @@ async function handleFormSubmit(e) {
         closeModal();
         fetchMenuItems();
     } catch (error) {
-        console.error("Error saving menu item:", error);
-        showError(getFriendlyErrorMessage(error));
+        console.error("Detailed Error saving menu item:", error);
+        // Expose raw error message for debugging as requested
+        showError(`Firebase Error: ${error.message || error.code || "Unknown error"}`);
     }
 }
 
@@ -175,8 +183,7 @@ async function fetchMenuItems() {
     try {
         const q = query(
             collection(db, "menuItems"),
-            where("restaurantId", "==", currentUserId),
-            orderBy("createdAt", "desc")
+            where("restaurantId", "==", currentUserId)
         );
 
         const querySnapshot = await getDocs(q);
