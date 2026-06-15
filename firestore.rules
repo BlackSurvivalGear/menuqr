@@ -14,5 +14,11 @@ service cloud.firestore {
       // Explicitly deny delete
       allow delete: if false;
     }
+
+    // Menu Category rules
+    match /menuCategories/{categoryId} {
+      allow create: if request.auth != null && request.resource.data.restaurantId == request.auth.uid;
+      allow read, update, delete: if request.auth != null && resource.data.restaurantId == request.auth.uid;
+    }
   }
 }
