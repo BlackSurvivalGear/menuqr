@@ -160,7 +160,7 @@ nav {
 /* Hero Section */
 .hero {
     position: relative;
-    padding: 8rem 0;
+    padding: 10rem 0;
     text-align: center;
     overflow: hidden;
     background-color: #f8fafc;
@@ -173,7 +173,8 @@ nav {
     width: 100%;
     height: 100%;
     z-index: 0;
-    opacity: 0.15;
+    opacity: 0.08;
+    pointer-events: none;
 }
 
 .hero-video-container video {
@@ -188,74 +189,67 @@ nav {
 }
 
 .hero h1 {
-    font-size: 3.5rem;
+    font-size: 4rem;
     line-height: 1.1;
     max-width: 800px;
     margin: 0 auto 1.5rem;
+    font-weight: 800;
 }
 
 .hero p {
-    font-size: 1.25rem;
-    max-width: 600px;
-    margin: 0 auto 2.5rem;
+    font-size: 1.5rem;
+    max-width: 700px;
+    margin: 0 auto 3rem;
+    color: var(--text-muted);
 }
 
 .cta-group {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     justify-content: center;
 }
 
 /* How It Works Section */
 .steps-section {
-    padding: 6rem 0;
+    padding: 100px 0;
 }
 
 .steps-section h2 {
     text-align: center;
+    margin-bottom: 4rem;
 }
 
 .steps-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    margin-top: 4rem;
+    gap: 2.5rem;
 }
 
 .step-card {
     background: white;
     border-radius: 1rem;
-    padding: 2rem;
-    border: 1px solid var(--border-color);
+    padding: 2.5rem;
     transition: var(--transition);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
 .step-card:hover {
     transform: translateY(-5px);
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
 }
-
-.step-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-}
-
-.step-green::before { background-color: var(--primary-color); }
-.step-orange::before { background-color: var(--accent-orange); }
-.step-gold::before { background-color: var(--secondary-gold); }
 
 .step-image {
     width: 100%;
-    height: 200px;
-    object-fit: contain;
-    margin-bottom: 1.5rem;
-    border-radius: 0.5rem;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    margin-bottom: 2rem;
+    border-radius: 0.75rem;
 }
 
 .step-number {
@@ -273,12 +267,13 @@ nav {
 
 /* Benefits Section */
 .benefits-section {
-    padding: 6rem 0;
+    padding: 100px 0;
     background-color: var(--bg-light);
 }
 
 .benefits-section h2 {
     text-align: center;
+    margin-bottom: 4rem;
 }
 
 .benefits-grid {
@@ -309,8 +304,12 @@ nav {
 
 /* See It In Action (Demo) */
 .demo-section {
-    padding: 6rem 0;
+    padding: 100px 0;
     text-align: center;
+}
+
+.demo-section h2 {
+    margin-bottom: 4rem;
 }
 
 .demo-content {
@@ -849,48 +848,39 @@ nav {
 footer {
     background-color: #111827;
     color: #9CA3AF;
-    padding: 5rem 0 2rem;
+    padding: 6rem 0 3rem;
 }
 
 .footer-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 4rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3rem;
     margin-bottom: 4rem;
 }
 
-.footer-brand h4 {
-    color: white;
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.footer-brand p {
-    color: #9CA3AF;
-}
-
-.footer-links h5 {
+.footer-column h5 {
     color: white;
     margin-bottom: 1.5rem;
     font-size: 1rem;
+    font-weight: 600;
 }
 
-.footer-links ul {
+.footer-column ul {
     list-style: none;
 }
 
-.footer-links li {
+.footer-column li {
     margin-bottom: 0.75rem;
 }
 
-.footer-links a {
+.footer-column a {
     color: #9CA3AF;
     text-decoration: none;
     transition: var(--transition);
 }
 
-.footer-links a:hover {
-    color: var(--primary-color);
+.footer-column a:hover {
+    color: white;
 }
 
 .footer-bottom {
@@ -898,11 +888,8 @@ footer {
     border-top: 1px solid #374151;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 0.875rem;
-}
-
-.footer-bottom p {
-    margin-bottom: 0;
 }
 
 /* Responsive */
@@ -913,11 +900,20 @@ footer {
 }
 
 @media (max-width: 768px) {
-    .hero h1 { font-size: 2.75rem; }
+    .hero { padding: 60px 0; }
+    .hero h1 { font-size: 2.5rem; }
     h2 { font-size: 2rem; }
 
-    .footer-grid {
+    .steps-section, .benefits-section, .demo-section {
+        padding: 60px 0;
+    }
+
+    .steps-grid {
         grid-template-columns: 1fr;
+    }
+
+    .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
         gap: 2.5rem;
     }
 
@@ -935,8 +931,12 @@ footer {
         grid-template-columns: 1fr;
     }
 
+    .footer-grid {
+        grid-template-columns: 1fr;
+    }
+
     .hero {
-        padding: 6rem 0;
+        padding: 60px 0;
     }
 
     .footer-bottom {
