@@ -1,14 +1,17 @@
 /* Base Styles */
 :root {
-    --primary-color: #2563eb;
-    --primary-hover: #1d4ed8;
-    --text-color: #1f2937;
-    --text-muted: #6b7280;
+    --primary-color: #008751; /* ScanMenu Primary Green */
+    --primary-hover: #007043;
+    --secondary-gold: #F2B134;
+    --accent-orange: #F97316;
+    --text-color: #111827; /* Headings */
+    --text-muted: #6B7280; /* Body text */
     --bg-color: #ffffff;
     --bg-light: #f9fafb;
     --error-color: #ef4444;
-    --border-color: #e5e7eb;
+    --border-color: #E5E7EB;
     --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --transition: all 0.3s ease;
 }
 
 * {
@@ -17,8 +20,12 @@
     padding: 0;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     line-height: 1.5;
     color: var(--text-color);
     background-color: var(--bg-color);
@@ -29,9 +36,9 @@ body {
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0 1.5rem;
 }
 
 /* Typography */
@@ -39,13 +46,13 @@ h1 {
     font-size: 3rem;
     font-weight: 800;
     margin-bottom: 1.5rem;
-    color: #111827;
+    color: var(--text-color);
 }
 
 h2 {
-    font-size: 1.875rem;
+    font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 h3 {
@@ -61,7 +68,9 @@ p {
 
 /* Buttons */
 .btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
     font-weight: 600;
@@ -69,8 +78,9 @@ p {
     text-decoration: none;
     border-radius: 0.375rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: var(--transition);
     border: 1px solid transparent;
+    gap: 0.5rem;
 }
 
 .btn-primary {
@@ -80,6 +90,17 @@ p {
 
 .btn-primary:hover {
     background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-gold);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    background-color: #e0a32d;
+    transform: translateY(-1px);
 }
 
 .btn-outline {
@@ -94,7 +115,6 @@ p {
 
 .btn-full {
     width: 100%;
-    margin-top: 1rem;
 }
 
 .btn-small {
@@ -130,6 +150,7 @@ nav {
     font-size: 1.5rem;
     font-weight: 800;
     color: var(--primary-color);
+    text-decoration: none;
 }
 
 .nav-links .btn {
@@ -138,19 +159,184 @@ nav {
 
 /* Hero Section */
 .hero {
-    padding: 6rem 0;
+    position: relative;
+    padding: 8rem 0;
     text-align: center;
+    overflow: hidden;
+    background-color: #f8fafc;
+}
+
+.hero-video-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.15;
+}
+
+.hero-video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero .container {
+    position: relative;
+    z-index: 1;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    line-height: 1.1;
+    max-width: 800px;
+    margin: 0 auto 1.5rem;
 }
 
 .hero p {
     font-size: 1.25rem;
     max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto 2.5rem;
 }
 
 .cta-group {
-    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* How It Works Section */
+.steps-section {
+    padding: 6rem 0;
+}
+
+.steps-section h2 {
+    text-align: center;
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 4rem;
+}
+
+.step-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--card-shadow);
+}
+
+.step-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+}
+
+.step-green::before { background-color: var(--primary-color); }
+.step-orange::before { background-color: var(--accent-orange); }
+.step-gold::before { background-color: var(--secondary-gold); }
+
+.step-image {
+    width: 100%;
+    height: 200px;
+    object-fit: contain;
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: var(--bg-light);
+    border-radius: 50%;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+/* Benefits Section */
+.benefits-section {
+    padding: 6rem 0;
+    background-color: var(--bg-light);
+}
+
+.benefits-section h2 {
+    text-align: center;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.benefit-card {
+    padding: 1.5rem;
+    background: white;
+    border-radius: 0.75rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.benefit-icon {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    background-color: rgba(0, 135, 81, 0.1);
+    color: var(--primary-color);
+}
+
+/* See It In Action (Demo) */
+.demo-section {
+    padding: 6rem 0;
+    text-align: center;
+}
+
+.demo-content {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    padding: 3rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-shadow);
+}
+
+.qr-placeholder {
+    width: 200px;
+    height: 200px;
+    margin: 2rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-light);
+    border-radius: 1rem;
+}
+
+.qr-placeholder img {
+    max-width: 100%;
+    height: auto;
 }
 
 /* Auth Pages */
@@ -196,7 +382,7 @@ nav {
 .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
-    ring: 2px solid rgba(37, 99, 235, 0.2);
+    ring: 2px solid rgba(0, 135, 81, 0.2);
 }
 
 .form-group textarea {
@@ -324,10 +510,15 @@ nav {
 .menu-item-card {
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
-    padding: 1rem;
-    background: var(--bg-light);
+    padding: 1.5rem;
+    background: white;
     display: flex;
     flex-direction: column;
+    transition: var(--transition);
+}
+
+.menu-item-card:hover {
+    box-shadow: var(--card-shadow);
 }
 
 .menu-item-header {
@@ -340,10 +531,11 @@ nav {
 .menu-item-name {
     font-weight: 700;
     font-size: 1.1rem;
+    color: var(--text-color);
 }
 
 .menu-item-price {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--primary-color);
 }
 
@@ -462,8 +654,8 @@ nav {
 .loader {
     width: 1.25rem;
     height: 1.25rem;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff;
+    border: 2px solid rgba(0, 135, 81, 0.3);
+    border-top-color: var(--primary-color);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     display: inline-block;
@@ -483,7 +675,7 @@ nav {
 .public-menu {
     max-width: 800px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 3rem 1.5rem;
 }
 
 .restaurant-header {
@@ -496,7 +688,7 @@ nav {
 .restaurant-name {
     font-size: 2.5rem;
     font-weight: 800;
-    color: #111827;
+    color: var(--text-color);
     margin-bottom: 0.5rem;
 }
 
@@ -512,6 +704,7 @@ nav {
     color: #25d366;
     text-decoration: none;
     font-weight: 600;
+    gap: 0.5rem;
 }
 
 .category-section {
@@ -524,7 +717,7 @@ nav {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--primary-color);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 2px solid var(--primary-color);
     padding-bottom: 0.5rem;
     margin-bottom: 1.5rem;
 }
@@ -557,7 +750,7 @@ nav {
 .item-name {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-color);
 }
 
 .item-description {
@@ -628,7 +821,7 @@ nav {
     overflow: hidden;
 }
 
-.qr-placeholder {
+.qr-placeholder-text {
     color: var(--text-muted);
     text-align: center;
 }
@@ -652,7 +845,106 @@ nav {
     display: flex;
 }
 
+/* Footer */
+footer {
+    background-color: #111827;
+    color: #9CA3AF;
+    padding: 5rem 0 2rem;
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 4rem;
+    margin-bottom: 4rem;
+}
+
+.footer-brand h4 {
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.footer-brand p {
+    color: #9CA3AF;
+}
+
+.footer-links h5 {
+    color: white;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.footer-links ul {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: 0.75rem;
+}
+
+.footer-links a {
+    color: #9CA3AF;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.footer-links a:hover {
+    color: var(--primary-color);
+}
+
+.footer-bottom {
+    padding-top: 2rem;
+    border-top: 1px solid #374151;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+}
+
+.footer-bottom p {
+    margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .steps-grid, .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero h1 { font-size: 2.75rem; }
+    h2 { font-size: 2rem; }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .cta-group {
+        flex-direction: column;
+    }
+
+    .btn-large {
+        width: 100%;
+    }
+}
+
 @media (max-width: 640px) {
+    .steps-grid, .benefits-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        padding: 6rem 0;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
     .restaurant-name {
         font-size: 2rem;
     }
@@ -667,9 +959,7 @@ nav {
     }
 }
 
-footer {
-    padding: 4rem 0;
-    text-align: center;
-    border-top: 1px solid var(--border-color);
-    margin-top: 4rem;
-}
+/* Utilities */
+.text-primary { color: var(--primary-color); }
+.text-gold { color: var(--secondary-gold); }
+.text-orange { color: var(--accent-orange); }
