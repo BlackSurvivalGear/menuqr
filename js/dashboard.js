@@ -130,41 +130,45 @@ async function renderUsageCard(uid, plan = "preview") {
         const isPreview = plan === "preview";
 
         usageSection.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div class="usage-header">
                 <h3 style="margin-bottom: 0;">${isPreview ? 'Preview Plan Usage' : 'Menu Usage'}</h3>
                 <span class="badge badge-featured">${isPreview ? 'Preview Plan' : 'Pro Plan'}</span>
             </div>
-            <div class="usage-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
-                    <div style="font-size: 0.875rem; color: var(--text-muted);">Main Courses</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Main Courses"]}${isPreview ? ' / 4' : ''}</div>
+            <div class="usage-container">
+                <div class="usage-row">
+                    <div class="stat-card-compact">
+                        <div class="stat-label-compact">Main Courses</div>
+                        <div class="stat-value-compact">${usage["Main Courses"]}${isPreview ? ' / 4' : ''}</div>
+                    </div>
+                    <div class="stat-card-compact">
+                        <div class="stat-label-compact">Starters</div>
+                        <div class="stat-value-compact">${usage["Starters"]}${isPreview ? ' / 2' : ''}</div>
+                    </div>
+                    <div class="stat-card-compact">
+                        <div class="stat-label-compact">Drinks</div>
+                        <div class="stat-value-compact">${usage["Drinks"]}${isPreview ? ' / 2' : ''}</div>
+                    </div>
+                    <div class="stat-card-compact">
+                        <div class="stat-label-compact">Desserts</div>
+                        <div class="stat-value-compact">${usage["Desserts"]}${isPreview ? ' / 2' : ''}</div>
+                    </div>
                 </div>
-                <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
-                    <div style="font-size: 0.875rem; color: var(--text-muted);">Starters</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Starters"]}${isPreview ? ' / 2' : ''}</div>
-                </div>
-                <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
-                    <div style="font-size: 0.875rem; color: var(--text-muted);">Drinks</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Drinks"]}${isPreview ? ' / 2' : ''}</div>
-                </div>
-                <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
-                    <div style="font-size: 0.875rem; color: var(--text-muted);">Desserts</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Desserts"]}${isPreview ? ' / 2' : ''}</div>
-                </div>
-                <div class="stat-card locked-stat" style="padding: 1rem; background: var(--bg-light); cursor: ${isPreview ? 'pointer' : 'default'};">
-                    <div style="font-size: 0.875rem; color: var(--text-muted);">${isPreview ? '🔒 ' : ''}Sides</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Sides"]}${isPreview ? ' / 0' : ''}</div>
-                </div>
-                <div class="stat-card locked-stat" style="padding: 1rem; background: var(--bg-light); cursor: ${isPreview ? 'pointer' : 'default'};">
-                    <div style="font-size: 0.875rem; color: var(--text-muted);">${isPreview ? '🔒 ' : ''}Specials</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Specials"]}${isPreview ? ' / 0' : ''}</div>
-                </div>
-                <div class="stat-card locked-stat" style="padding: 1rem; background: var(--bg-light); cursor: ${isPreview ? 'pointer' : 'default'};">
-                    <div style="font-size: 0.875rem; color: var(--text-muted);">${isPreview ? '🔒 ' : ''}Custom Categories</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Custom Categories"]}${isPreview ? ' / 0' : ''}</div>
+                <div class="usage-row">
+                    <div class="stat-card-compact locked-stat" style="cursor: ${isPreview ? 'pointer' : 'default'};">
+                        <div class="stat-label-compact">${isPreview ? '🔒 ' : ''}Sides</div>
+                        <div class="stat-value-compact">${usage["Sides"]}${isPreview ? ' / 0' : ''}</div>
+                    </div>
+                    <div class="stat-card-compact locked-stat" style="cursor: ${isPreview ? 'pointer' : 'default'};">
+                        <div class="stat-label-compact">${isPreview ? '🔒 ' : ''}Specials</div>
+                        <div class="stat-value-compact">${usage["Specials"]}${isPreview ? ' / 0' : ''}</div>
+                    </div>
+                    <div class="stat-card-compact locked-stat" style="cursor: ${isPreview ? 'pointer' : 'default'};">
+                        <div class="stat-label-compact">${isPreview ? '🔒 ' : ''}Custom Categories</div>
+                        <div class="stat-value-compact">${usage["Custom Categories"]}${isPreview ? ' / 0' : ''}</div>
+                    </div>
                 </div>
             </div>
-            ${isPreview ? '<p style="margin-bottom: 0; font-size: 0.875rem;">Upgrade to Pro to unlock unlimited menu items and advanced categories.</p>' : ''}
+            ${isPreview ? '<p style="margin-bottom: 0; font-size: 0.875rem; margin-top: 0.75rem;">Upgrade to Pro to unlock unlimited menu items and advanced categories.</p>' : ''}
         `;
 
         if (isPreview) {
