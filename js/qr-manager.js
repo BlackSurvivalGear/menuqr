@@ -20,17 +20,20 @@ const qrError = document.getElementById("qr-error");
 let currentUid = null;
 let currentBizName = "restaurant";
 let publicMenuUrl = "";
+let currentLogoUrl = "";
 
 /**
  * Initialize the QR Manager
  * @param {string} uid - Authenticated user UID
  * @param {string} businessName - Restaurant business name
+ * @param {string} logoUrl - Restaurant logo URL
  */
-export function initQRManager(uid, businessName) {
+export function initQRManager(uid, businessName, logoUrl = "") {
     if (!uid) return;
 
     currentUid = uid;
     currentBizName = businessName || "Restaurant";
+    currentLogoUrl = logoUrl;
     publicMenuUrl = `https://www.scanmenu.africa/menu.html?id=${uid}`;
 
     if (generateBtn) {
@@ -92,6 +95,14 @@ function handleGenerateQR() {
         // Update UI
         qrPreviewContainer.innerHTML = "";
         qrPreviewContainer.appendChild(canvas);
+
+        // Add logo preview if available
+        if (currentLogoUrl) {
+            const logoImg = document.createElement("img");
+            logoImg.src = currentLogoUrl;
+            logoImg.className = "qr-logo-preview";
+            qrPreviewContainer.appendChild(logoImg);
+        }
 
         qrBizNameEl.textContent = currentBizName;
         qrPublicUrlEl.textContent = publicMenuUrl;
