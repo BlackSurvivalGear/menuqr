@@ -46,8 +46,10 @@ onAuthStateChanged(auth, async (user) => {
                 if (planBadge) {
                     planBadge.innerText = userPlan.charAt(0).toUpperCase() + userPlan.slice(1);
                     planBadge.style.display = "inline-block";
+                    planBadge.className = "badge"; // Reset
                     if (userPlan === "pro") planBadge.classList.add("badge-featured");
                     else if (userPlan === "standard") planBadge.classList.add("badge-available");
+                    else planBadge.classList.add("badge-preview");
                 }
 
                 if (userData.createdAt) {
