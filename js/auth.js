@@ -130,6 +130,7 @@ if (authForm) {
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
                     email: user.email,
+                    plan: "preview",
                     createdAt: serverTimestamp()
                 });
 
