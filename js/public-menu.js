@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import firebaseConfig from "./firebase-config.js";
 
 // Initialize Firebase
@@ -9,6 +9,7 @@ const firestore = getFirestore(app);
 // Order State
 let cart = [];
 let currentRestaurantData = null;
+let menuViewIncremented = false;
 
 // DOM Elements
 const loadingScreen = document.getElementById("loading-screen");
@@ -275,6 +276,15 @@ async function init() {
 
         try {
             renderRestaurantDetails(restaurantData);
+
+            // Increment Menu Views (Analytics)
+            if (!menuViewIncremented) {
+                const restDocRef = doc(firestore, "restaurants", restaurantUid);
+                updateDoc(restDocRef, {
+                    menuViews: increment(1)
+                }).catch(err => console.error("Error incrementing menu views:", err));
+                menuViewIncremented = true;
+            }
         } catch (e) {
             console.error("Error rendering restaurant details:", e);
         }
@@ -485,6 +495,16 @@ Thank you.`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+    // Increment WhatsApp Clicks (Analytics)
+    const urlParams = new URLSearchParams(window.location.search);
+    const restaurantUid = urlParams.get("id");
+    if (restaurantUid) {
+        const restDocRef = doc(firestore, "restaurants", restaurantUid);
+        updateDoc(restDocRef, {
+            whatsappClicks: increment(1)
+        }).catch(err => console.error("Error incrementing whatsapp clicks:", err));
+    }
 
     window.open(whatsappUrl, "_blank");
 }
