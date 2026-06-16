@@ -11,7 +11,9 @@ import {
     startAfter,
     limitToLast,
     endBefore,
-    getCountFromServer
+    getCountFromServer,
+    updateDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 // Global state for pagination and filtering
@@ -76,7 +78,71 @@ async function init() {
     // Event Listeners for Exports
     document.getElementById('export-users-btn').addEventListener('click', exportUsersCSV);
     document.getElementById('export-restaurants-btn').addEventListener('click', exportRestaurantsCSV);
+
+    // Modal close listeners
+    document.getElementById('close-subscription-modal').addEventListener('click', hideSubscriptionModal);
+    document.getElementById('cancel-subscription-btn').addEventListener('click', hideSubscriptionModal);
 }
+
+/**
+ * Subscription Management Functions
+ */
+let pendingUpdate = null;
+
+function showSubscriptionModal(uid, email, currentPlan, newPlan) {
+    pendingUpdate = { uid, newPlan };
+    document.getElementById('modal-user-email').innerText = email;
+    document.getElementById('modal-current-plan').innerText = currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1);
+    document.getElementById('modal-new-plan').innerText = newPlan.charAt(0).toUpperCase() + newPlan.slice(1);
+    document.getElementById('subscription-modal').classList.remove('hidden');
+}
+
+function hideSubscriptionModal() {
+    pendingUpdate = null;
+    document.getElementById('subscription-modal').classList.add('hidden');
+}
+
+document.getElementById('confirm-subscription-btn').addEventListener('click', async () => {
+    if (!pendingUpdate) return;
+
+    const { uid, newPlan } = pendingUpdate;
+    const confirmBtn = document.getElementById('confirm-subscription-btn');
+    const originalText = confirmBtn.innerText;
+
+    confirmBtn.disabled = true;
+    confirmBtn.innerText = "Updating...";
+
+    try {
+        const userRef = doc(db, "users", uid);
+
+        // Calculate expiry date (1 year from now for standard/pro, null for preview)
+        let subscriptionExpiry = null;
+        if (newPlan === "standard" || newPlan === "pro") {
+            const expiryDate = new Date();
+            expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+            subscriptionExpiry = expiryDate;
+        }
+
+        const updateData = {
+            plan: newPlan,
+            subscriptionActivatedAt: serverTimestamp(),
+            activatedBy: auth.currentUser ? auth.currentUser.email : "system",
+            subscriptionExpiry: subscriptionExpiry
+        };
+
+        await updateDoc(userRef, updateData);
+
+        hideSubscriptionModal();
+        alert("Subscription updated successfully!");
+        loadUsers(); // Refresh the table
+    } catch (error) {
+        console.error("Error updating subscription:", error);
+        alert("Failed to update subscription. See console for details.");
+    } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = originalText;
+    }
+});
 
 /**
  * Load Platform Statistics
@@ -101,33 +167,32 @@ async function loadStats() {
  */
 async function loadUsers(searchTerm = "") {
     const tableBody = document.getElementById('users-table-body');
-    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Loading users...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading users...</td></tr>';
 
     try {
         let q = query(collection(db, "users"), orderBy("createdAt", "desc"));
 
-        // Note: Simple Firestore search is limited. For a real app, use Algolia or similar.
-        // Here we'll fetch all and filter client-side for simplicity if searchTerm is provided,
-        // OR just do a basic prefix search if possible.
-        // Since we need to match email/username/uid, client-side filter is easier for this demo.
-
         const querySnapshot = await getDocs(q);
-        let users = [];
 
-        // We need to check if each user has a restaurant
+        // Fetch all restaurants to link with users
         const restaurantDocs = await getDocs(collection(db, "restaurants"));
-        const restaurantUids = new Set();
-        restaurantDocs.forEach(doc => restaurantUids.add(doc.id));
+        const restaurantMap = {};
+        restaurantDocs.forEach(doc => {
+            restaurantMap[doc.id] = doc.data();
+        });
 
+        let users = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
+            const restaurant = restaurantMap[doc.id] || {};
+
             users.push({
                 uid: doc.id,
                 email: data.email || "",
-                username: data.email ? data.email.split('@')[0] : "N/A",
+                businessName: restaurant.businessName || "N/A",
+                ownerName: restaurant.ownerName || "N/A",
                 plan: data.plan || "preview",
-                createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
-                hasRestaurant: restaurantUids.has(doc.id)
+                createdAt: data.createdAt ? data.createdAt.toDate() : new Date()
             });
         });
 
@@ -135,7 +200,8 @@ async function loadUsers(searchTerm = "") {
             users = users.filter(u =>
                 u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 u.uid.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                u.username.toLowerCase().includes(searchTerm.toLowerCase())
+                u.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                u.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -143,7 +209,7 @@ async function loadUsers(searchTerm = "") {
         renderUsersTable(users);
     } catch (error) {
         console.error("Error loading users:", error);
-        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading users.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Error loading users.</td></tr>';
     }
 }
 
@@ -152,24 +218,51 @@ function renderUsersTable(users) {
     tableBody.innerHTML = '';
 
     if (users.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No users found.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No users found.</td></tr>';
         return;
     }
 
     users.forEach(user => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
+            <td><strong>${user.businessName}</strong></td>
+            <td>${user.ownerName}</td>
             <td>${user.email}</td>
-            <td>${user.username}</td>
             <td style="font-family: monospace; font-size: 0.75rem;">${user.uid}</td>
-            <td><span class="badge ${user.plan === 'pro' ? 'badge-featured' : ''}">${user.plan}</span></td>
+            <td>
+                <select class="plan-selector" data-uid="${user.uid}" data-current-plan="${user.plan}" data-email="${user.email}">
+                    <option value="preview" ${user.plan === 'preview' ? 'selected' : ''}>Preview</option>
+                    <option value="standard" ${user.plan === 'standard' ? 'selected' : ''}>Standard</option>
+                    <option value="pro" ${user.plan === 'pro' ? 'selected' : ''}>Pro</option>
+                </select>
+            </td>
             <td>${user.createdAt.toLocaleDateString()}</td>
-            <td>${user.hasRestaurant ? '✅ Yes' : '❌ No'}</td>
+            <td>
+                <button class="btn btn-primary btn-small update-subscription" data-uid="${user.uid}">Update Subscription</button>
+            </td>
         `;
         tableBody.appendChild(tr);
     });
 
     document.getElementById('users-page-info').innerText = `Total: ${users.length}`;
+
+    // Add event listeners for the update buttons
+    document.querySelectorAll('.update-subscription').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const uid = btn.getAttribute('data-uid');
+            const selector = document.querySelector(`.plan-selector[data-uid="${uid}"]`);
+            const newPlan = selector.value;
+            const currentPlan = selector.getAttribute('data-current-plan');
+            const email = selector.getAttribute('data-email');
+
+            if (newPlan === currentPlan) {
+                alert("Please select a different plan to update.");
+                return;
+            }
+
+            showSubscriptionModal(uid, email, currentPlan, newPlan);
+        });
+    });
 }
 
 /**
@@ -287,16 +380,16 @@ function exportUsersCSV() {
     if (usersData.length === 0) return;
 
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Email,Username,UID,Plan,Registration Date,Restaurant Status\n";
+    csvContent += "Restaurant Name,Owner Name,Email,UID,Plan,Registration Date\n";
 
     usersData.forEach(u => {
         const row = [
+            `"${u.businessName.replace(/"/g, '""')}"`,
+            `"${u.ownerName.replace(/"/g, '""')}"`,
             u.email,
-            u.username,
             u.uid,
             u.plan,
-            u.createdAt.toISOString(),
-            u.hasRestaurant ? "Yes" : "No"
+            u.createdAt.toISOString()
         ].join(",");
         csvContent += row + "\n";
     });
