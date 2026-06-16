@@ -104,16 +104,23 @@
         </div>
     </main>
 
-    <div id="coming-soon-modal" class="modal hidden">
-        <div class="modal-content" style="max-width: 400px; text-align: center;">
+    <div id="paypal-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 450px; text-align: center;">
             <div class="modal-header">
-                <h3>Coming Soon</h3>
+                <h3 id="paypal-modal-title">Upgrade to Standard?</h3>
                 <span class="close-modal" id="close-modal">&times;</span>
             </div>
             <div style="padding: 1rem 0;">
-                <p>Payment integration is coming soon to ScanMenu.Africa!</p>
-                <p>We are currently finalizing our local payment partnerships to serve you better.</p>
-                <button class="btn btn-primary btn-full" style="margin-top: 1.5rem;" id="close-modal-btn">Got it</button>
+                <p id="paypal-modal-message">You will be redirected to PayPal to complete your annual subscription purchase.</p>
+
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    Once payment has been completed, your ScanMenu.Africa subscription will be activated. If activation does not occur automatically, please contact support with your PayPal transaction reference.
+                </p>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-outline" style="flex: 1;" id="close-modal-btn">Cancel</button>
+                    <button class="btn btn-primary" style="flex: 1;" id="paypal-continue-btn">Continue to PayPal</button>
+                </div>
             </div>
         </div>
     </div>

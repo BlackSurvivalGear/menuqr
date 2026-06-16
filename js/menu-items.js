@@ -174,10 +174,38 @@ function handleCategoryChange() {
  */
 function showUpgradeModal(customMessage) {
     if (upgradeModal) {
+        const titleEl = document.getElementById('upgrade-modal-title');
+        const descEl = document.getElementById('upgrade-modal-description');
+        const upgradeStandardBtn = document.getElementById('upgrade-standard-btn');
+        const upgradeProBtn = document.getElementById('upgrade-pro-btn');
+
         if (customMessage) {
-            const msgEl = upgradeModal.querySelector('.upgrade-message p');
-            if (msgEl) msgEl.innerText = customMessage;
+            if (descEl) descEl.innerText = customMessage;
         }
+
+        if (customMessage && customMessage.includes("Pro")) {
+            if (titleEl) titleEl.innerText = "Upgrade to Pro";
+            if (upgradeStandardBtn) upgradeStandardBtn.classList.add('hidden');
+            if (upgradeProBtn) upgradeProBtn.classList.remove('hidden');
+        } else {
+            if (titleEl) titleEl.innerText = "Upgrade Your Plan";
+            if (currentUserPlan === "preview") {
+                if (upgradeStandardBtn) upgradeStandardBtn.classList.remove('hidden');
+                if (upgradeProBtn) upgradeProBtn.classList.remove('hidden');
+            } else if (currentUserPlan === "standard") {
+                if (upgradeStandardBtn) upgradeStandardBtn.classList.add('hidden');
+                if (upgradeProBtn) upgradeProBtn.classList.remove('hidden');
+            }
+        }
+
+        // Set up upgrade modal buttons if they haven't been (though dashboard.js should handle it, we ensure here)
+        if (upgradeStandardBtn) {
+            upgradeStandardBtn.onclick = () => window.open("https://www.paypal.com/ncp/payment/PU2EMNU3XNUJN", "_blank");
+        }
+        if (upgradeProBtn) {
+            upgradeProBtn.onclick = () => window.open("https://www.paypal.com/ncp/payment/B3FM4VTP4UPXE", "_blank");
+        }
+
         upgradeModal.classList.remove("hidden");
     } else {
         alert(customMessage || "Upgrade to Pro to unlock advanced menu categories!");

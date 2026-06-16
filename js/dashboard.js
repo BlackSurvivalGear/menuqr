@@ -157,6 +157,10 @@ async function renderUsageCard(uid, plan = "preview") {
             headerTitle = "Standard Plan Usage";
             badgeText = "Standard Plan";
             badgeClass = "badge-available";
+        } else if (isPro) {
+            headerTitle = "Pro Plan Usage";
+            badgeText = "Current Plan: Pro";
+            badgeClass = "badge-featured";
         }
 
         let usageHTML = `
@@ -228,15 +232,43 @@ async function renderUsageCard(uid, plan = "preview") {
 
         usageSection.innerHTML = usageHTML;
 
+        // Set up upgrade modal buttons
+        const upgradeStandardBtn = document.getElementById('upgrade-standard-btn');
+        const upgradeProBtn = document.getElementById('upgrade-pro-btn');
+
+        if (upgradeStandardBtn) {
+            upgradeStandardBtn.onclick = () => window.open("https://www.paypal.com/ncp/payment/PU2EMNU3XNUJN", "_blank");
+        }
+        if (upgradeProBtn) {
+            upgradeProBtn.onclick = () => window.open("https://www.paypal.com/ncp/payment/B3FM4VTP4UPXE", "_blank");
+        }
+
         // Add event listeners to locked stats
         usageSection.querySelectorAll('.locked-stat').forEach(el => {
             el.addEventListener('click', () => {
                 const modal = document.getElementById('upgrade-modal');
                 if (modal) {
-                    const msg = el.innerText.includes("Custom")
-                        ? "Unlock custom categories with ScanMenu.Africa Pro."
-                        : "Unlock advanced menu categories with ScanMenu.Africa Standard or Pro.";
-                    modal.querySelector('.upgrade-message p').innerText = msg;
+                    const titleEl = document.getElementById('upgrade-modal-title');
+                    const descEl = document.getElementById('upgrade-modal-description');
+
+                    if (el.innerText.includes("Custom")) {
+                        if (titleEl) titleEl.innerText = "Upgrade to Pro";
+                        if (descEl) descEl.innerText = "Unlock custom categories with ScanMenu.Africa Pro.";
+                        if (upgradeStandardBtn) upgradeStandardBtn.classList.add('hidden');
+                        if (upgradeProBtn) upgradeProBtn.classList.remove('hidden');
+                    } else {
+                        if (titleEl) titleEl.innerText = "Upgrade Your Plan";
+                        if (descEl) descEl.innerText = "Unlock advanced menu categories with ScanMenu.Africa Standard or Pro.";
+
+                        if (plan === "preview") {
+                            if (upgradeStandardBtn) upgradeStandardBtn.classList.remove('hidden');
+                            if (upgradeProBtn) upgradeProBtn.classList.remove('hidden');
+                        } else if (plan === "standard") {
+                            if (upgradeStandardBtn) upgradeStandardBtn.classList.add('hidden');
+                            if (upgradeProBtn) upgradeProBtn.classList.remove('hidden');
+                        }
+                    }
+
                     modal.classList.remove('hidden');
                 }
             });
@@ -261,6 +293,14 @@ function getNormalizedCategory(category) {
     if (cat === "side" || cat === "sides") return "Sides";
     if (cat === "special" || cat === "specials") return "Specials";
     return null;
+}
+
+const cancelUpgradeBtn = document.getElementById("cancel-upgrade-btn");
+if (cancelUpgradeBtn) {
+    cancelUpgradeBtn.addEventListener("click", () => {
+        const modal = document.getElementById('upgrade-modal');
+        if (modal) modal.classList.add('hidden');
+    });
 }
 
 if (editProfileBtn) {

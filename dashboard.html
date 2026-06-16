@@ -185,23 +185,30 @@
     </main>
 
     <div id="upgrade-modal" class="modal hidden">
-        <div class="modal-content" style="max-width: 450px;">
+        <div class="modal-content" style="max-width: 480px;">
             <div class="modal-header">
-                <h3 style="color: var(--primary-color);">ScanMenu.Africa Pro</h3>
+                <h3 style="color: var(--primary-color);" id="upgrade-modal-title">Upgrade Your Plan</h3>
                 <span class="close-modal" id="close-upgrade-modal">&times;</span>
             </div>
             <div class="upgrade-message">
-                <p>Unlock advanced menu categories with ScanMenu.Africa Pro.</p>
-                <p><strong>Pro includes:</strong></p>
-                <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
-                    <li style="margin-bottom: 0.5rem;">✓ Unlimited menu items</li>
-                    <li style="margin-bottom: 0.5rem;">✓ Unlimited categories</li>
-                    <li style="margin-bottom: 0.5rem;">✓ Sides & Specials</li>
-                    <li style="margin-bottom: 0.5rem;">✓ Custom Categories</li>
-                </ul>
-                <p style="font-weight: 600; color: var(--text-color);">Upgrade to go live with your complete restaurant menu.</p>
-                <div style="margin-top: 2rem;">
-                    <a href="pricing.html" class="btn btn-primary btn-full">View Plans & Pricing</a>
+                <p id="upgrade-modal-description">Upgrade to unlock more features and grow your restaurant.</p>
+
+                <div id="upgrade-options" style="display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0;">
+                    <button id="upgrade-standard-btn" class="btn btn-primary btn-full hidden">Upgrade to Standard ($9.99/year)</button>
+                    <button id="upgrade-pro-btn" class="btn btn-secondary btn-full hidden">Upgrade to Pro ($49.99/year)</button>
+                </div>
+
+                <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-light); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-muted);">
+                    <p style="margin-bottom: 0.5rem; font-weight: 600; color: var(--text-color);">Redirection Info:</p>
+                    <p>You will be redirected to PayPal to complete your annual subscription purchase.</p>
+                    <p style="margin-top: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
+                        Once payment has been completed, your ScanMenu.Africa subscription will be activated. If activation does not occur automatically, please contact support with your PayPal transaction reference.
+                    </p>
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
+                    <button id="cancel-upgrade-btn" class="btn btn-outline btn-full">Cancel</button>
+                    <a href="pricing.html" class="btn btn-link btn-small">View All Plans & Pricing</a>
                 </div>
             </div>
         </div>
