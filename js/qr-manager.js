@@ -92,17 +92,42 @@ function handleGenerateQR() {
         }
         ctx.restore();
 
-        // Update UI
+        // Update UI - Reorder branding elements
         qrPreviewContainer.innerHTML = "";
+        qrPreviewContainer.style.flexDirection = "column";
+        qrPreviewContainer.style.gap = "1.5rem";
+        qrPreviewContainer.style.padding = "2rem 1rem";
+        qrPreviewContainer.style.height = "auto";
+        qrPreviewContainer.style.minHeight = "450px";
+
+        // 1. QR Code
         qrPreviewContainer.appendChild(canvas);
 
-        // Add logo preview if available
+        // 2. Restaurant Logo (if available)
         if (currentLogoUrl) {
             const logoImg = document.createElement("img");
             logoImg.src = currentLogoUrl;
             logoImg.className = "qr-logo-preview";
+            logoImg.style.marginTop = "0"; // Reset margin
             qrPreviewContainer.appendChild(logoImg);
         }
+
+        // 3. Business Name
+        const bizNameLabel = document.createElement("div");
+        bizNameLabel.textContent = currentBizName;
+        bizNameLabel.style.fontSize = "1.25rem";
+        bizNameLabel.style.fontWeight = "700";
+        bizNameLabel.style.color = "var(--text-color)";
+        qrPreviewContainer.appendChild(bizNameLabel);
+
+        // 4. Menu URL
+        const urlLabel = document.createElement("div");
+        urlLabel.textContent = publicMenuUrl;
+        urlLabel.style.fontSize = "0.875rem";
+        urlLabel.style.color = "var(--text-muted)";
+        urlLabel.style.wordBreak = "break-all";
+        urlLabel.style.textAlign = "center";
+        qrPreviewContainer.appendChild(urlLabel);
 
         if (qrBizNameEl) qrBizNameEl.textContent = currentBizName;
         if (qrPublicUrlEl) qrPublicUrlEl.textContent = publicMenuUrl;

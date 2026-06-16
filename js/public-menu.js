@@ -20,6 +20,9 @@ const resName = document.getElementById("res-name");
 const resAddress = document.getElementById("res-address");
 const resWhatsapp = document.getElementById("res-whatsapp");
 const cartPanel = document.getElementById("cart-panel");
+const mobileCartSummary = document.getElementById("mobile-cart-summary");
+const drawerOverlay = document.getElementById("drawer-overlay");
+const menuLayout = document.getElementById("menu-layout");
 
 const errorTitle = document.getElementById("error-title");
 const errorMessage = document.getElementById("error-message");
@@ -30,7 +33,9 @@ const errorMessage = document.getElementById("error-message");
 function showError(title, message) {
     console.log("Showing error:", title, message);
     if (loadingScreen) loadingScreen.classList.add("hidden");
-    if (menuContainer) menuContainer.classList.add("hidden");
+    if (menuLayout) menuLayout.classList.add("hidden");
+    if (mobileCartSummary) mobileCartSummary.classList.add("hidden");
+    if (cartPanel) cartPanel.classList.add("hidden");
     if (errorScreen) {
         errorScreen.classList.remove("hidden");
         if (errorTitle) errorTitle.textContent = title;
@@ -44,7 +49,7 @@ function showError(title, message) {
 function showMenu() {
     if (loadingScreen) loadingScreen.classList.add("hidden");
     if (errorScreen) errorScreen.classList.add("hidden");
-    if (menuContainer) menuContainer.classList.remove("hidden");
+    if (menuLayout) menuLayout.classList.remove("hidden");
 }
 
 /**
@@ -107,7 +112,14 @@ function renderRestaurantDetails(data) {
             logoImg.className = "restaurant-logo";
 
             logoContainer.appendChild(logoImg);
-            resName.parentNode.insertBefore(logoContainer, resName);
+
+            // Ensure logo is at the top of the header, before the name
+            const header = resName.closest('.restaurant-header');
+            if (header) {
+                header.prepend(logoContainer);
+            } else {
+                resName.parentNode.insertBefore(logoContainer, resName);
+            }
         }
     }
 
@@ -306,12 +318,34 @@ function updateQuantity(itemId, delta) {
 }
 
 /**
+ * Toggle the mobile cart drawer
+ */
+function toggleCartDrawer(isOpen) {
+    if (isOpen) {
+        cartPanel.classList.add("drawer-open");
+        drawerOverlay.classList.add("active");
+        document.body.style.overflow = "hidden"; // Prevent scrolling
+    } else {
+        cartPanel.classList.remove("drawer-open");
+        drawerOverlay.classList.remove("active");
+        document.body.style.overflow = ""; // Restore scrolling
+    }
+}
+
+/**
  * Render the cart panel UI
  */
 function renderCart() {
     if (!cartPanel) return;
 
     if (cart.length === 0) {
+        cartPanel.classList.remove("drawer-open");
+        if (mobileCartSummary) mobileCartSummary.classList.add("hidden");
+        if (drawerOverlay) drawerOverlay.classList.remove("active");
+        document.body.style.overflow = "";
+
+        // On desktop, keep the panel visible but empty/hidden if desired
+        // For this UI, let's hide it completely if empty
         cartPanel.classList.add("hidden");
         return;
     }
@@ -319,9 +353,11 @@ function renderCart() {
     cartPanel.classList.remove("hidden");
 
     let total = 0;
+    let itemCount = 0;
     const itemsHtml = cart.map(item => {
         const itemTotal = item.price * item.quantity;
         total += itemTotal;
+        itemCount += item.quantity;
         return `
             <div class="cart-item">
                 <div class="cart-item-info">
@@ -337,9 +373,13 @@ function renderCart() {
         `;
     }).join("");
 
+    // Render Full Cart Panel (Desktop sidebar / Mobile drawer)
     cartPanel.innerHTML = `
         <div class="cart-header">
-            <h3>Your Order</h3>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="close-drawer-btn" style="display: none;" onclick="toggleCartDrawer(false)">&times;</button>
+                <h3 style="margin: 0;">Your Order</h3>
+            </div>
             <button class="btn btn-link btn-small" onclick="clearCart()" style="color: var(--error-color)">Clear All</button>
         </div>
         <div class="cart-items">
@@ -353,6 +393,25 @@ function renderCart() {
             Order via WhatsApp
         </button>
     `;
+
+    // Show close button on mobile drawer
+    if (window.innerWidth < 1024) {
+        const closeBtn = cartPanel.querySelector(".close-drawer-btn");
+        if (closeBtn) closeBtn.style.display = "flex";
+    }
+
+    // Render Mobile Fixed Summary
+    if (mobileCartSummary) {
+        mobileCartSummary.innerHTML = `
+            <div class="cart-summary-info">
+                <div class="cart-summary-count">${itemCount}</div>
+                <span class="cart-summary-label">View Order</span>
+            </div>
+            <div class="cart-summary-total">£${total.toFixed(2)}</div>
+        `;
+        mobileCartSummary.classList.remove("hidden");
+        mobileCartSummary.onclick = () => toggleCartDrawer(true);
+    }
 }
 
 /**
@@ -403,8 +462,22 @@ Thank you.`;
     window.open(whatsappUrl, "_blank");
 }
 
+// Initialize drawer overlay click
+if (drawerOverlay) {
+    drawerOverlay.addEventListener("click", () => toggleCartDrawer(false));
+}
+
+// Handle window resize to adjust drawer state
+window.addEventListener("resize", () => {
+    if (window.innerWidth >= 1024) {
+        toggleCartDrawer(false);
+        document.body.style.overflow = "";
+    }
+});
+
 // Expose functions to window for onclick handlers in string templates
 window.addToCart = addToCart;
 window.updateQuantity = updateQuantity;
 window.clearCart = clearCart;
 window.sendWhatsAppOrder = sendWhatsAppOrder;
+window.toggleCartDrawer = toggleCartDrawer;
