@@ -13,8 +13,12 @@ import {
     endBefore,
     getCountFromServer,
     updateDoc,
-    serverTimestamp
+    serverTimestamp,
+    deleteDoc,
+    writeBatch
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
+import { deleteUser } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 
 // Global state for pagination and filtering
 let usersData = [];
@@ -82,6 +86,105 @@ async function init() {
     // Modal close listeners
     document.getElementById('close-subscription-modal').addEventListener('click', hideSubscriptionModal);
     document.getElementById('cancel-subscription-btn').addEventListener('click', hideSubscriptionModal);
+
+    // Delete Modal Listeners
+    document.getElementById('close-delete-modal').addEventListener('click', hideDeleteModal);
+    document.getElementById('cancel-delete-btn').addEventListener('click', hideDeleteModal);
+    document.getElementById('delete-confirm-input').addEventListener('input', (e) => {
+        document.getElementById('permanently-delete-btn').disabled = (e.target.value !== "DELETE");
+    });
+    document.getElementById('permanently-delete-btn').addEventListener('click', executeUserDeletion);
+}
+
+/**
+ * User Deletion Functions
+ */
+let pendingDeletion = null;
+
+function showDeleteModal(uid, email, businessName) {
+    pendingDeletion = { uid, email, businessName };
+    document.getElementById('delete-modal-user-email').innerText = email;
+    document.getElementById('delete-modal-biz-name').innerText = businessName;
+    document.getElementById('delete-confirm-input').value = "";
+    document.getElementById('permanently-delete-btn').disabled = true;
+    document.getElementById('delete-user-modal').classList.remove('hidden');
+}
+
+function hideDeleteModal() {
+    pendingDeletion = null;
+    document.getElementById('delete-user-modal').classList.add('hidden');
+}
+
+async function executeUserDeletion() {
+    if (!pendingDeletion) return;
+
+    const { uid, email } = pendingDeletion;
+    const deleteBtn = document.getElementById('permanently-delete-btn');
+    const originalText = deleteBtn.innerText;
+
+    deleteBtn.disabled = true;
+    deleteBtn.innerText = "Deleting...";
+
+    try {
+        // 1. Delete Firestore Data
+        const batch = writeBatch(db);
+
+        // Delete user doc
+        batch.delete(doc(db, "users", uid));
+
+        // Delete restaurant doc
+        batch.delete(doc(db, "restaurants", uid));
+
+        // Delete Menu Items
+        const menuItemsQ = query(collection(db, "menuItems"), where("restaurantId", "==", uid));
+        const menuItemsSnap = await getDocs(menuItemsQ);
+        menuItemsSnap.forEach(item => batch.delete(item.ref));
+
+        // Delete Menu Categories
+        const categoriesQ = query(collection(db, "menuCategories"), where("restaurantId", "==", uid));
+        const categoriesSnap = await getDocs(categoriesQ);
+        categoriesSnap.forEach(cat => batch.delete(cat.ref));
+
+        // Execute batch
+        await batch.commit();
+
+        // 2. Attempt Auth Deletion (Client-side limitation)
+        let authDeleted = false;
+        try {
+            // Note: This only works if the admin is deleting THEIR OWN account,
+            // OR if we are using Admin SDK (not available in client).
+            // However, the requirement says "Attempt to delete... If Authentication deletion cannot be performed... Display warning"
+
+            // In a standard Firebase client-side setup, you can't delete another user's auth account.
+            // We'll check if the currentUser is the one being deleted (unlikely for admin dashboard).
+            if (auth.currentUser && auth.currentUser.uid === uid) {
+                await deleteUser(auth.currentUser);
+                authDeleted = true;
+            } else {
+                // Cannot delete another user via client-side Auth API
+                throw new Error("Client-side Firebase Auth can only delete the currently authenticated user.");
+            }
+        } catch (authError) {
+            console.warn("Auth deletion skipped or failed:", authError.message);
+        }
+
+        hideDeleteModal();
+
+        if (authDeleted) {
+            alert("User and all associated data deleted successfully.");
+        } else {
+            alert(`User data deleted. Firebase Authentication account (${email}) must be removed manually from the Firebase Console.`);
+        }
+
+        loadUsers(); // Refresh the table
+        loadStats(); // Update stats
+    } catch (error) {
+        console.error("Error during deletion:", error);
+        alert("An error occurred during deletion: " + error.message);
+    } finally {
+        deleteBtn.disabled = false;
+        deleteBtn.innerText = originalText;
+    }
 }
 
 /**
@@ -238,7 +341,10 @@ function renderUsersTable(users) {
             </td>
             <td>${user.createdAt.toLocaleDateString()}</td>
             <td>
-                <button class="btn btn-primary btn-small update-subscription" data-uid="${user.uid}">Update Subscription</button>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button class="btn btn-primary btn-small update-subscription" data-uid="${user.uid}">Update Subscription</button>
+                    <button class="btn btn-error btn-small delete-user-btn" data-uid="${user.uid}" data-email="${user.email}" data-biz="${user.businessName}">Delete User</button>
+                </div>
             </td>
         `;
         tableBody.appendChild(tr);
@@ -261,6 +367,16 @@ function renderUsersTable(users) {
             }
 
             showSubscriptionModal(uid, email, currentPlan, newPlan);
+        });
+    });
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-user-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const uid = btn.getAttribute('data-uid');
+            const email = btn.getAttribute('data-email');
+            const biz = btn.getAttribute('data-biz');
+            showDeleteModal(uid, email, biz);
         });
     });
 }
