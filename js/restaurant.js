@@ -17,8 +17,23 @@ const successMessage = document.getElementById("success-message");
 const pageTitle = document.getElementById("page-title");
 const cancelBtn = document.getElementById("cancel-btn");
 
+// Logo elements
+const logoInput = document.getElementById("logo-input");
+const uploadLogoBtn = document.getElementById("upload-logo-btn");
+const replaceLogoBtn = document.getElementById("replace-logo-btn");
+const removeLogoBtn = document.getElementById("remove-logo-btn");
+const logoPreview = document.getElementById("logo-preview");
+const noLogoText = document.getElementById("no-logo-text");
+const progressContainer = document.getElementById("upload-progress-container");
+const progressBar = document.getElementById("upload-progress-bar");
+const uploadStatus = document.getElementById("upload-status");
+
 let isEditMode = false;
 let existingCreatedAt = null;
+let currentLogoUrl = "";
+
+const CLOUDINARY_CLOUD_NAME = "dekre5agw";
+const CLOUDINARY_UPLOAD_PRESET = "scanmenu_logos";
 
 // Form fields
 const businessNameInput = document.getElementById("businessName");
@@ -39,6 +54,7 @@ onAuthStateChanged(auth, async (user) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
             existingCreatedAt = data.createdAt;
+            currentLogoUrl = data.logoUrl || "";
 
             if (isEditMode) {
                 setupEditMode(data);
@@ -59,6 +75,10 @@ onAuthStateChanged(auth, async (user) => {
 async function setupEditMode(data) {
     pageTitle.innerText = "Edit Restaurant Profile";
     cancelBtn.classList.remove("hidden");
+
+    if (data.logoUrl) {
+        showLogoPreview(data.logoUrl);
+    }
 
     try {
         businessNameInput.value = data.businessName || "";
@@ -82,6 +102,114 @@ function showSuccess(message) {
     successMessage.innerText = message;
     successMessage.classList.remove("hidden");
     errorMessage.classList.add("hidden");
+}
+
+// Logo Management functions
+function showLogoPreview(url) {
+    logoPreview.src = url;
+    logoPreview.classList.remove("hidden");
+    noLogoText.classList.add("hidden");
+    uploadLogoBtn.classList.add("hidden");
+    replaceLogoBtn.classList.remove("hidden");
+    removeLogoBtn.classList.remove("hidden");
+}
+
+function hideLogoPreview() {
+    logoPreview.src = "";
+    logoPreview.classList.add("hidden");
+    noLogoText.classList.remove("hidden");
+    uploadLogoBtn.classList.remove("hidden");
+    replaceLogoBtn.classList.add("hidden");
+    removeLogoBtn.classList.add("hidden");
+}
+
+uploadLogoBtn.addEventListener("click", () => logoInput.click());
+replaceLogoBtn.addEventListener("click", () => logoInput.click());
+
+removeLogoBtn.addEventListener("click", async () => {
+    if (confirm("Are you sure you want to remove the logo?")) {
+        currentLogoUrl = "";
+        hideLogoPreview();
+        showSuccess("Logo removed successfully. Save profile to apply changes.");
+
+        // Optionally update Firestore immediately if we're in edit mode
+        if (auth.currentUser) {
+            const docRef = doc(db, "restaurants", auth.currentUser.uid);
+            await updateDoc(docRef, {
+                logoUrl: "",
+                updatedAt: serverTimestamp()
+            });
+        }
+    }
+});
+
+logoInput.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validation
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        showError("File size too large. Maximum size is 5MB.");
+        return;
+    }
+
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+        showError("Invalid file type. Please upload PNG, JPG, or WEBP.");
+        return;
+    }
+
+    uploadFile(file);
+    // Reset input so the same file can be selected again
+    e.target.value = "";
+});
+
+async function uploadFile(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    progressContainer.classList.remove("hidden");
+    uploadStatus.classList.remove("hidden");
+    uploadStatus.innerText = "Uploading logo...";
+    progressBar.style.width = "0%";
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`);
+
+    xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            progressBar.style.width = percentComplete + "%";
+        }
+    };
+
+    xhr.onload = async () => {
+        if (xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            currentLogoUrl = response.secure_url;
+            showLogoPreview(currentLogoUrl);
+            showSuccess("Logo uploaded successfully! Save profile to apply changes.");
+
+            progressContainer.classList.add("hidden");
+            uploadStatus.innerText = "Upload complete!";
+            setTimeout(() => uploadStatus.classList.add("hidden"), 3000);
+        } else {
+            console.error("Cloudinary Error:", xhr.responseText);
+            showError("Upload failed. Please try again.");
+            progressContainer.classList.add("hidden");
+            uploadStatus.classList.add("hidden");
+        }
+    };
+
+    xhr.onerror = () => {
+        showError("Upload failed. Please check your connection.");
+        progressContainer.classList.add("hidden");
+        uploadStatus.classList.add("hidden");
+    };
+
+    xhr.send(formData);
 }
 
 restaurantForm.addEventListener("submit", async (e) => {
@@ -118,6 +246,7 @@ restaurantForm.addEventListener("submit", async (e) => {
             phone,
             whatsapp,
             address,
+            logoUrl: currentLogoUrl,
             createdAt: isEditMode ? existingCreatedAt : serverTimestamp(),
             updatedAt: serverTimestamp()
         };

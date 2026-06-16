@@ -23,6 +23,27 @@
                 <h2 id="page-title">Restaurant Profile Setup</h2>
                 <p id="page-subtitle">Please provide your business details to get started.</p>
 
+                <div class="logo-upload-container">
+                    <h3>Restaurant Logo</h3>
+                    <div id="logo-preview-box" class="logo-preview-box">
+                        <span id="no-logo-text">No logo uploaded.</span>
+                        <img id="logo-preview" class="logo-preview hidden" src="" alt="Logo Preview">
+                    </div>
+
+                    <input type="file" id="logo-input" accept="image/png, image/jpeg, image/jpg, image/webp" class="hidden">
+
+                    <div class="logo-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                        <button type="button" id="upload-logo-btn" class="btn btn-outline btn-small">Upload Logo</button>
+                        <button type="button" id="replace-logo-btn" class="btn btn-outline btn-small hidden">Replace Logo</button>
+                        <button type="button" id="remove-logo-btn" class="btn btn-outline btn-small hidden" style="color: var(--error-color); border-color: var(--error-color);">Remove Logo</button>
+                    </div>
+
+                    <div id="upload-progress-container" class="progress-container hidden">
+                        <div id="upload-progress-bar" class="progress-bar"></div>
+                    </div>
+                    <p id="upload-status" class="text-muted hidden" style="font-size: 0.8rem; margin-top: 0.5rem;"></p>
+                </div>
+
                 <form id="restaurant-form">
                     <div class="form-group">
                         <label for="businessName">Business Name</label>

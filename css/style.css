@@ -829,6 +829,19 @@ header {
     margin-bottom: 3rem;
     padding-bottom: 2rem;
     border-bottom: 2px solid var(--bg-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.restaurant-logo {
+    max-width: 140px;
+    height: auto;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+    object-fit: cover;
+    aspect-ratio: 1 / 1;
+    border: 3px solid var(--primary-light);
 }
 
 .restaurant-name {
@@ -1525,4 +1538,54 @@ tr:hover {
         max-width: 100%;
         border-radius: 0;
     }
+}
+
+/* Logo Upload Styles */
+.logo-upload-container {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.logo-preview-box {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    border: 2px dashed var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-light);
+    overflow: hidden;
+    position: relative;
+}
+
+.logo-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.qr-logo-preview {
+    max-width: 80px;
+    height: auto;
+    margin-top: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.progress-container {
+    width: 100%;
+    height: 8px;
+    background-color: var(--bg-light);
+    border-radius: 4px;
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    width: 0%;
+    transition: width 0.3s ease;
 }

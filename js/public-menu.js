@@ -92,6 +92,20 @@ async function fetchMenuItems(uid) {
  */
 function renderRestaurantDetails(data) {
     currentRestaurantData = data;
+
+    // Add logo if available
+    if (data.logoUrl && resName) {
+        // Check if logo already exists to avoid duplication
+        const existingLogo = document.querySelector(".restaurant-logo");
+        if (!existingLogo) {
+            const logoImg = document.createElement("img");
+            logoImg.src = data.logoUrl;
+            logoImg.alt = data.businessName || "Restaurant Logo";
+            logoImg.className = "restaurant-logo";
+            resName.parentNode.insertBefore(logoImg, resName);
+        }
+    }
+
     if (resName) resName.textContent = data.businessName || "Restaurant";
     if (resAddress) resAddress.textContent = data.address || "";
 
