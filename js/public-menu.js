@@ -218,7 +218,8 @@ function renderMenu(items) {
                 const itemPrice = document.createElement("div");
                 itemPrice.className = "item-price";
                 const priceValue = parseFloat(item.price);
-                itemPrice.textContent = `£${isNaN(priceValue) ? "0.00" : priceValue.toFixed(2)}`;
+                const currencySymbol = currentRestaurantData.currencySymbol || "£";
+                itemPrice.textContent = `${currencySymbol}${isNaN(priceValue) ? "0.00" : priceValue.toFixed(2)}`;
 
                 itemEl.appendChild(itemMain);
 
@@ -369,6 +370,7 @@ function renderCart() {
 
     let total = 0;
     let itemCount = 0;
+    const currencySymbol = currentRestaurantData.currencySymbol || "£";
     const itemsHtml = cart.map(item => {
         const itemTotal = item.price * item.quantity;
         total += itemTotal;
@@ -377,7 +379,7 @@ function renderCart() {
             <div class="cart-item">
                 <div class="cart-item-info">
                     <span class="cart-item-name">${item.name}</span>
-                    <span class="cart-item-price">£${item.price.toFixed(2)} each</span>
+                    <span class="cart-item-price">${currencySymbol}${item.price.toFixed(2)} each</span>
                 </div>
                 <div class="cart-item-actions">
                     <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
@@ -402,7 +404,7 @@ function renderCart() {
         </div>
         <div class="cart-total">
             <span>Total:</span>
-            <span>£${total.toFixed(2)}</span>
+            <span>${currencySymbol}${total.toFixed(2)}</span>
         </div>
         <button class="btn btn-whatsapp-order" onclick="sendWhatsAppOrder()">
             Order via WhatsApp
@@ -422,7 +424,7 @@ function renderCart() {
                 <div class="cart-summary-count">${itemCount}</div>
                 <span class="cart-summary-label">View Order</span>
             </div>
-            <div class="cart-summary-total">£${total.toFixed(2)}</div>
+            <div class="cart-summary-total">${currencySymbol}${total.toFixed(2)}</div>
         `;
         mobileCartSummary.classList.remove("hidden");
         mobileCartSummary.onclick = () => toggleCartDrawer(true);
@@ -452,10 +454,11 @@ function sendWhatsAppOrder() {
     }
 
     let total = 0;
+    const currencySymbol = currentRestaurantData.currencySymbol || "£";
     const itemsList = cart.map(item => {
         const itemTotal = item.price * item.quantity;
         total += itemTotal;
-        return `${item.quantity} × ${item.name} (£${item.price.toFixed(2)})`;
+        return `${item.quantity} × ${item.name} (${currencySymbol}${item.price.toFixed(2)})`;
     }).join("\n");
 
     const message = `Hello ${restaurantName},
@@ -464,7 +467,7 @@ I'd like to place the following order:
 
 ${itemsList}
 
-Order Total: £${total.toFixed(2)}
+Order Total: ${currencySymbol}${total.toFixed(2)}
 
 Collection or Delivery:
 Customer Name:

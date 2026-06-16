@@ -28,16 +28,19 @@ const closeUpgradeModalBtn = document.getElementById("close-upgrade-modal");
 
 let currentUserId = null;
 let currentUserPlan = "preview";
+let currentCurrencySymbol = "£";
 let previousCategory = "";
 
 /**
  * Initializes the Menu Builder
  * @param {string} uid
  * @param {string} plan
+ * @param {string} currencySymbol
  */
-export function initMenuItems(uid, plan = "preview") {
+export function initMenuItems(uid, plan = "preview", currencySymbol = "£") {
     currentUserId = uid;
     currentUserPlan = plan;
+    currentCurrencySymbol = currencySymbol;
 
     if (addMenuItemBtn) {
         addMenuItemBtn.addEventListener("click", () => openModal());
@@ -395,7 +398,7 @@ function renderMenuItems(items) {
         nameSpan.textContent = item.name;
         const priceSpan = document.createElement("span");
         priceSpan.className = "menu-item-price";
-        priceSpan.textContent = `£${item.price.toFixed(2)}`;
+        priceSpan.textContent = `${currentCurrencySymbol}${item.price.toFixed(2)}`;
         header.appendChild(nameSpan);
         header.appendChild(priceSpan);
 

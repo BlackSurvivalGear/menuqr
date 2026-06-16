@@ -22,6 +22,7 @@ const ownerNameEl = document.getElementById("owner-name");
 const bizPhoneEl = document.getElementById("biz-phone");
 const bizWhatsappEl = document.getElementById("biz-whatsapp");
 const bizAddressEl = document.getElementById("biz-address");
+const bizCurrencyEl = document.getElementById("biz-currency");
 const editProfileBtn = document.getElementById("edit-profile-btn");
 
 onAuthStateChanged(auth, async (user) => {
@@ -74,8 +75,21 @@ onAuthStateChanged(auth, async (user) => {
                 bizWhatsappEl.innerText = restData.whatsapp || "N/A";
                 bizAddressEl.innerText = restData.address || "N/A";
 
+                const currencyCode = restData.currencyCode || "GBP";
+                const currencySymbol = restData.currencySymbol || "£";
+
+                if (bizCurrencyEl) {
+                    bizCurrencyEl.innerText = `${currencyCode} (${currencySymbol})`;
+                }
+
+                // Update price input symbol in modal
+                const priceCurrencySymbolEl = document.getElementById("price-currency-symbol");
+                if (priceCurrencySymbolEl) {
+                    priceCurrencySymbolEl.innerText = currencySymbol;
+                }
+
                 // Initialize menu items management
-                initMenuItems(user.uid, userPlan);
+                initMenuItems(user.uid, userPlan, currencySymbol);
 
                 // Show usage card
                 renderUsageCard(user.uid, userPlan);
