@@ -110,6 +110,9 @@ onAuthStateChanged(auth, async (user) => {
 
                     // Initialize Orders management
                     initOrders(user.uid);
+
+                    // Render Analytics
+                    renderAnalytics(restData);
                 } else {
                     bizNameEl.innerText = "No profile found";
                     ownerNameEl.innerText = "No profile found";
@@ -320,6 +323,30 @@ function getNormalizedCategory(category) {
     if (cat === "side" || cat === "sides") return "Sides";
     if (cat === "special" || cat === "specials") return "Specials";
     return null;
+}
+
+/**
+ * Renders the analytics data
+ * @param {object} data Restaurant document data
+ */
+function renderAnalytics(data) {
+    const menuViews = data.menuViews || 0;
+    const whatsappClicks = data.whatsappClicks || 0;
+
+    const menuViewsEl = document.getElementById("stat-menu-views");
+    const whatsappClicksEl = document.getElementById("stat-whatsapp-clicks");
+    const conversionRateEl = document.getElementById("stat-conversion-rate");
+
+    if (menuViewsEl) menuViewsEl.innerText = menuViews;
+    if (whatsappClicksEl) whatsappClicksEl.innerText = whatsappClicks;
+
+    if (conversionRateEl) {
+        let conversionRate = 0;
+        if (menuViews > 0) {
+            conversionRate = (whatsappClicks / menuViews) * 100;
+        }
+        conversionRateEl.innerText = `${conversionRate.toFixed(1)}%`;
+    }
 }
 
 const cancelUpgradeBtn = document.getElementById("cancel-upgrade-btn");
