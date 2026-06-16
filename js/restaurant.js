@@ -35,12 +35,93 @@ let currentLogoUrl = "";
 const CLOUDINARY_CLOUD_NAME = "dekre5agw";
 const CLOUDINARY_UPLOAD_PRESET = "scanmenu_logos";
 
+const SUPPORTED_CURRENCIES = [
+    { code: "DZD", symbol: "د.ج", name: "Algerian Dinar" },
+    { code: "AOA", symbol: "Kz", name: "Angolan Kwanza" },
+    { code: "BWP", symbol: "P", name: "Botswana Pula" },
+    { code: "BIF", symbol: "FBu", name: "Burundian Franc" },
+    { code: "CVE", symbol: "Esc", name: "Cape Verdean Escudo" },
+    { code: "XAF", symbol: "CFA", name: "Central African CFA Franc" },
+    { code: "KMF", symbol: "CF", name: "Comorian Franc" },
+    { code: "CDF", symbol: "FC", name: "Congolese Franc" },
+    { code: "DJF", symbol: "Fdj", name: "Djiboutian Franc" },
+    { code: "EGP", symbol: "ج.م", name: "Egyptian Pound" },
+    { code: "ERN", symbol: "Nfk", name: "Eritrean Nakfa" },
+    { code: "SZL", symbol: "E", name: "Eswatini Lilangeni" },
+    { code: "ETB", symbol: "Br", name: "Ethiopian Birr" },
+    { code: "GMD", symbol: "D", name: "Gambian Dalasi" },
+    { code: "GHS", symbol: "GH₵", name: "Ghanaian Cedi" },
+    { code: "GNF", symbol: "FG", name: "Guinean Franc" },
+    { code: "KES", symbol: "KSh", name: "Kenyan Shilling" },
+    { code: "LSL", symbol: "L", name: "Lesotho Loti" },
+    { code: "LRD", symbol: "L$", name: "Liberian Dollar" },
+    { code: "LYD", symbol: "ل.د", name: "Libyan Dinar" },
+    { code: "MGA", symbol: "Ar", name: "Malagasy Ariary" },
+    { code: "MWK", symbol: "MK", name: "Malawian Kwacha" },
+    { code: "MRU", symbol: "UM", name: "Mauritanian Ouguiya" },
+    { code: "MUR", symbol: "₨", name: "Mauritian Rupee" },
+    { code: "MAD", symbol: "د.م", name: "Moroccan Dirham" },
+    { code: "MZN", symbol: "MT", name: "Mozambican Metical" },
+    { code: "NAD", symbol: "N$", name: "Namibian Dollar" },
+    { code: "NGN", symbol: "₦", name: "Nigerian Naira" },
+    { code: "RWF", symbol: "FRw", name: "Rwandan Franc" },
+    { code: "STN", symbol: "Db", name: "São Tomé & Príncipe Dobra" },
+    { code: "SCR", symbol: "₨", name: "Seychellois Rupee" },
+    { code: "SLE", symbol: "Le", name: "Sierra Leonean Leone" },
+    { code: "SOS", symbol: "Sh", name: "Somali Shilling" },
+    { code: "ZAR", symbol: "R", name: "South African Rand" },
+    { code: "SSP", symbol: "£", name: "South Sudanese Pound" },
+    { code: "SDG", symbol: "ج.س", name: "Sudanese Pound" },
+    { code: "TZS", symbol: "TSh", name: "Tanzanian Shilling" },
+    { code: "TND", symbol: "د.ت", name: "Tunisian Dinar" },
+    { code: "UGX", symbol: "USh", name: "Ugandan Shilling" },
+    { code: "XOF", symbol: "CFA", name: "West African CFA Franc" },
+    { code: "ZMW", symbol: "ZK", name: "Zambian Kwacha" },
+    { code: "ZWG", symbol: "ZiG", name: "Zimbabwe Gold" },
+    { code: "USD", symbol: "$", name: "United States Dollar" },
+    { code: "GBP", symbol: "£", name: "British Pound Sterling" },
+    { code: "EUR", symbol: "€", name: "Euro" },
+    { code: "RUB", symbol: "₽", name: "Russian Ruble" },
+    { code: "CAD", symbol: "C$", name: "Canadian Dollar" }
+];
+
 // Form fields
 const businessNameInput = document.getElementById("businessName");
 const ownerNameInput = document.getElementById("ownerName");
 const phoneInput = document.getElementById("phone");
 const whatsappInput = document.getElementById("whatsapp");
 const addressInput = document.getElementById("address");
+const currencyInput = document.getElementById("currency-input");
+const currencyList = document.getElementById("currency-list");
+const currencyHidden = document.getElementById("currency");
+
+// Populate currency dropdown
+function populateCurrencies() {
+    if (!currencyList) return;
+
+    SUPPORTED_CURRENCIES.forEach(curr => {
+        const option = document.createElement("option");
+        const displayName = `${curr.name} (${curr.symbol})`;
+        option.value = displayName;
+        option.setAttribute('data-code', curr.code);
+        currencyList.appendChild(option);
+    });
+
+    if (currencyInput) {
+        currencyInput.addEventListener('change', (e) => {
+            const val = e.target.value;
+            const option = SUPPORTED_CURRENCIES.find(c => `${c.name} (${c.symbol})` === val);
+            if (option) {
+                currencyHidden.value = option.code;
+            } else {
+                // If typed value is not in list, clear hidden value or keep it for validation
+                currencyHidden.value = "";
+            }
+        });
+    }
+}
+
+populateCurrencies();
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -86,6 +167,13 @@ async function setupEditMode(data) {
         phoneInput.value = data.phone || "";
         whatsappInput.value = data.whatsapp || "";
         addressInput.value = data.address || "";
+
+        const currencyCode = data.currencyCode || "GBP";
+        const curr = SUPPORTED_CURRENCIES.find(c => c.code === currencyCode);
+        if (curr && currencyInput && currencyHidden) {
+            currencyInput.value = `${curr.name} (${curr.symbol})`;
+            currencyHidden.value = curr.code;
+        }
     } catch (error) {
         console.error("Error fetching restaurant data:", error);
         showError("Failed to load restaurant profile.");
@@ -220,10 +308,11 @@ restaurantForm.addEventListener("submit", async (e) => {
     const phone = phoneInput.value.trim();
     const whatsapp = whatsappInput.value.trim();
     const address = addressInput.value.trim();
+    const currencyCode = currencyHidden ? currencyHidden.value : "";
 
     // Basic Validation
-    if (!businessName || !ownerName || !phone || !whatsapp || !address) {
-        showError("All fields are required.");
+    if (!businessName || !ownerName || !phone || !whatsapp || !address || !currencyCode) {
+        showError("All fields are required. Please select a valid currency from the list.");
         return;
     }
 
@@ -239,6 +328,8 @@ restaurantForm.addEventListener("submit", async (e) => {
             return;
         }
 
+        const selectedCurrency = SUPPORTED_CURRENCIES.find(c => c.code === currencyCode);
+
         const restaurantData = {
             ownerUid: auth.currentUser.uid,
             businessName,
@@ -246,6 +337,8 @@ restaurantForm.addEventListener("submit", async (e) => {
             phone,
             whatsapp,
             address,
+            currencyCode,
+            currencySymbol: selectedCurrency ? selectedCurrency.symbol : "£",
             logoUrl: currentLogoUrl,
             createdAt: isEditMode ? existingCreatedAt : serverTimestamp(),
             updatedAt: serverTimestamp()

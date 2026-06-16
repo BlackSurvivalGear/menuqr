@@ -41,7 +41,7 @@
                     <textarea id="item-description" rows="3" placeholder="Optional description..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="item-price">Price *</label>
+                    <label for="item-price">Price (<span id="price-currency-symbol">£</span>) *</label>
                     <input type="number" id="item-price" step="0.01" required placeholder="0.00">
                 </div>
                 <div class="form-group">
@@ -110,9 +110,13 @@
                         <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">WhatsApp</span>
                         <span id="biz-whatsapp" class="value">Loading...</span>
                     </div>
-                    <div class="detail-item" style="margin-bottom: 1.5rem;">
+                    <div class="detail-item" style="margin-bottom: 0.75rem; border-bottom: 1px solid var(--bg-light); padding-bottom: 0.5rem;">
                         <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">Address</span>
                         <span id="biz-address" class="value">Loading...</span>
+                    </div>
+                    <div class="detail-item" style="margin-bottom: 1.5rem;">
+                        <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">Menu Currency</span>
+                        <span id="biz-currency" class="value">Loading...</span>
                     </div>
                     <button id="edit-profile-btn" class="btn btn-outline btn-full">Edit Profile</button>
                 </section>
