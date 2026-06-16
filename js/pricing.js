@@ -2,7 +2,9 @@ import { auth, db } from "./auth.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-const comingSoonModal = document.getElementById("coming-soon-modal");
+const paypalModal = document.getElementById("paypal-modal");
+const paypalModalTitle = document.getElementById("paypal-modal-title");
+const paypalContinueBtn = document.getElementById("paypal-continue-btn");
 const closeModalBtns = [
     document.getElementById("close-modal"),
     document.getElementById("close-modal-btn")
@@ -10,6 +12,12 @@ const closeModalBtns = [
 const upgradeBtns = document.querySelectorAll(".upgrade-btn");
 
 let userPlan = "preview";
+let selectedPlanLink = "";
+
+const PAYPAL_LINKS = {
+    standard: "https://www.paypal.com/ncp/payment/PU2EMNU3XNUJN",
+    pro: "https://www.paypal.com/ncp/payment/B3FM4VTP4UPXE"
+};
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -58,7 +66,13 @@ function updateUIForCurrentPlan(plan) {
                 btn.classList.remove("btn-primary", "btn-secondary");
                 btn.classList.add("btn-outline");
             } else {
-                btn.innerText = "Upgrade";
+                if (btnPlan === "standard") {
+                    btn.innerText = "Upgrade to Standard";
+                } else if (btnPlan === "pro") {
+                    btn.innerText = "Upgrade to Pro";
+                } else {
+                    btn.innerText = "Upgrade";
+                }
                 btn.disabled = false;
             }
         }
@@ -71,12 +85,27 @@ function handleUpgrade(plan) {
         return;
     }
 
-    // For now, just show "Coming Soon" modal
-    if (comingSoonModal) {
-        comingSoonModal.classList.remove("hidden");
+    if (plan === "preview" || !PAYPAL_LINKS[plan]) return;
+
+    selectedPlanLink = PAYPAL_LINKS[plan];
+
+    if (paypalModal) {
+        if (paypalModalTitle) {
+            paypalModalTitle.innerText = `Upgrade to ${plan.charAt(0).toUpperCase() + plan.slice(1)}?`;
+        }
+        paypalModal.classList.remove("hidden");
     } else {
-        alert("Upgrade functionality coming soon!");
+        window.open(selectedPlanLink, "_blank");
     }
+}
+
+if (paypalContinueBtn) {
+    paypalContinueBtn.addEventListener("click", () => {
+        if (selectedPlanLink) {
+            window.open(selectedPlanLink, "_blank");
+            if (paypalModal) paypalModal.classList.add("hidden");
+        }
+    });
 }
 
 upgradeBtns.forEach(btn => {
@@ -89,14 +118,14 @@ upgradeBtns.forEach(btn => {
 closeModalBtns.forEach(btn => {
     if (btn) {
         btn.addEventListener("click", () => {
-            if (comingSoonModal) comingSoonModal.classList.add("hidden");
+            if (paypalModal) paypalModal.classList.add("hidden");
         });
     }
 });
 
 // Close modal when clicking outside
 window.addEventListener("click", (e) => {
-    if (e.target === comingSoonModal) {
-        comingSoonModal.classList.add("hidden");
+    if (e.target === paypalModal) {
+        paypalModal.classList.add("hidden");
     }
 });
