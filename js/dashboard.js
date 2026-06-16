@@ -65,10 +65,8 @@ onAuthStateChanged(auth, async (user) => {
                 // Initialize menu items management
                 initMenuItems(user.uid, userPlan);
 
-                // If preview plan, show usage card
-                if (userPlan === "preview") {
-                    renderUsageCard(user.uid);
-                }
+                // Show usage card
+                renderUsageCard(user.uid, userPlan);
 
                 // Initialize QR Code management
                 initQRManager(user.uid, restData.businessName);
@@ -90,10 +88,11 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 /**
- * Renders the Preview Plan Usage card
+ * Renders the Plan Usage card
  * @param {string} uid
+ * @param {string} plan
  */
-async function renderUsageCard(uid) {
+async function renderUsageCard(uid, plan = "preview") {
     const usageSection = document.getElementById("plan-usage-section");
     if (!usageSection) return;
 
@@ -108,42 +107,75 @@ async function renderUsageCard(uid) {
             "Main Courses": 0,
             "Drinks": 0,
             "Starters": 0,
-            "Desserts": 0
+            "Desserts": 0,
+            "Sides": 0,
+            "Specials": 0,
+            "Custom Categories": 0
         };
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             const normalized = getNormalizedCategory(data.category);
-            if (normalized && usage.hasOwnProperty(normalized)) {
-                usage[normalized]++;
+            if (normalized) {
+                if (usage.hasOwnProperty(normalized)) {
+                    usage[normalized]++;
+                } else {
+                    usage["Custom Categories"]++;
+                }
+            } else if (data.category) {
+                usage["Custom Categories"]++;
             }
         });
 
+        const isPreview = plan === "preview";
+
         usageSection.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h3 style="margin-bottom: 0;">Preview Plan Usage</h3>
-                <span class="badge badge-featured">Preview Plan</span>
+                <h3 style="margin-bottom: 0;">${isPreview ? 'Preview Plan Usage' : 'Menu Usage'}</h3>
+                <span class="badge badge-featured">${isPreview ? 'Preview Plan' : 'Pro Plan'}</span>
             </div>
-            <div class="usage-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="usage-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                 <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
                     <div style="font-size: 0.875rem; color: var(--text-muted);">Main Courses</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Main Courses"]} / 4</div>
-                </div>
-                <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
-                    <div style="font-size: 0.875rem; color: var(--text-muted);">Drinks</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Drinks"]} / 2</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Main Courses"]}${isPreview ? ' / 4' : ''}</div>
                 </div>
                 <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
                     <div style="font-size: 0.875rem; color: var(--text-muted);">Starters</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Starters"]} / 2</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Starters"]}${isPreview ? ' / 2' : ''}</div>
+                </div>
+                <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">Drinks</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Drinks"]}${isPreview ? ' / 2' : ''}</div>
                 </div>
                 <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
                     <div style="font-size: 0.875rem; color: var(--text-muted);">Desserts</div>
-                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Desserts"]} / 2</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Desserts"]}${isPreview ? ' / 2' : ''}</div>
+                </div>
+                <div class="stat-card locked-stat" style="padding: 1rem; background: var(--bg-light); cursor: ${isPreview ? 'pointer' : 'default'};">
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">${isPreview ? '🔒 ' : ''}Sides</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Sides"]}${isPreview ? ' / 0' : ''}</div>
+                </div>
+                <div class="stat-card locked-stat" style="padding: 1rem; background: var(--bg-light); cursor: ${isPreview ? 'pointer' : 'default'};">
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">${isPreview ? '🔒 ' : ''}Specials</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Specials"]}${isPreview ? ' / 0' : ''}</div>
+                </div>
+                <div class="stat-card locked-stat" style="padding: 1rem; background: var(--bg-light); cursor: ${isPreview ? 'pointer' : 'default'};">
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">${isPreview ? '🔒 ' : ''}Custom Categories</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Custom Categories"]}${isPreview ? ' / 0' : ''}</div>
                 </div>
             </div>
-            <p style="margin-bottom: 0; font-size: 0.875rem;">Upgrade to Pro to unlock unlimited menus.</p>
+            ${isPreview ? '<p style="margin-bottom: 0; font-size: 0.875rem;">Upgrade to Pro to unlock unlimited menu items and advanced categories.</p>' : ''}
         `;
+
+        if (isPreview) {
+            usageSection.querySelectorAll('.locked-stat').forEach(el => {
+                el.addEventListener('click', () => {
+                    const modal = document.getElementById('upgrade-modal');
+                    if (modal) modal.classList.remove('hidden');
+                });
+            });
+        }
+
         usageSection.classList.remove("hidden");
     } catch (error) {
         console.error("Error rendering usage card:", error);
@@ -160,6 +192,8 @@ function getNormalizedCategory(category) {
     if (cat === "starter" || cat === "starters") return "Starters";
     if (cat === "drink" || cat === "drinks") return "Drinks";
     if (cat === "dessert" || cat === "desserts") return "Desserts";
+    if (cat === "side" || cat === "sides") return "Sides";
+    if (cat === "special" || cat === "specials") return "Specials";
     return null;
 }
 

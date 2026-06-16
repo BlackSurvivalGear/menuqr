@@ -39,15 +39,11 @@
                     <select id="item-category">
                         <option value="Main Courses">Main Courses</option>
                         <option value="Starters">Starters</option>
-                        <option value="Breakfast">Breakfast</option>
-                        <option value="Lunch">Lunch</option>
-                        <option value="Dinner">Dinner</option>
                         <option value="Drinks">Drinks</option>
                         <option value="Desserts">Desserts</option>
                         <option value="Sides">Sides</option>
                         <option value="Specials">Specials</option>
-                        <option value="Other">Other</option>
-                        <option value="custom">-- Custom Category --</option>
+                        <option value="custom">Custom Category</option>
                     </select>
                 </div>
                 <div id="custom-category-group" class="form-group hidden">
@@ -171,6 +167,29 @@
             </section>
         </div>
     </main>
+
+    <div id="upgrade-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 style="color: var(--primary-color);">ScanMenu.Africa Pro</h3>
+                <span class="close-modal" id="close-upgrade-modal">&times;</span>
+            </div>
+            <div class="upgrade-message">
+                <p>Unlock advanced menu categories with ScanMenu.Africa Pro.</p>
+                <p><strong>Pro includes:</strong></p>
+                <ul style="list-style: none; padding: 0; margin-bottom: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;">✓ Unlimited menu items</li>
+                    <li style="margin-bottom: 0.5rem;">✓ Unlimited categories</li>
+                    <li style="margin-bottom: 0.5rem;">✓ Sides & Specials</li>
+                    <li style="margin-bottom: 0.5rem;">✓ Custom Categories</li>
+                </ul>
+                <p style="font-weight: 600; color: var(--text-color);">Upgrade to go live with your complete restaurant menu.</p>
+                <div style="margin-top: 2rem;">
+                    <button class="btn btn-primary btn-full" onclick="document.getElementById('upgrade-modal').classList.add('hidden')">Got it</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="module" src="js/dashboard.js"></script>
 </body>
