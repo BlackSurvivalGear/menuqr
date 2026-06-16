@@ -1,6 +1,13 @@
 import { auth, db } from "./auth.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import {
+    doc,
+    getDoc,
+    collection,
+    query,
+    where,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { initMenuItems } from "./menu-items.js";
 import { initQRManager } from "./qr-manager.js";
 
@@ -28,9 +35,11 @@ onAuthStateChanged(auth, async (user) => {
             // Fetch User Account Info
             const userDocRef = doc(db, "users", user.uid);
             const userDoc = await getDoc(userDocRef);
+            let userPlan = "preview";
 
             if (userDoc.exists()) {
                 const userData = userDoc.data();
+                userPlan = userData.plan || "preview";
                 if (userData.createdAt) {
                     const date = userData.createdAt.toDate();
                     userCreatedAtEl.innerText = date.toLocaleString();
@@ -54,7 +63,12 @@ onAuthStateChanged(auth, async (user) => {
                 bizAddressEl.innerText = restData.address || "N/A";
 
                 // Initialize menu items management
-                initMenuItems(user.uid);
+                initMenuItems(user.uid, userPlan);
+
+                // If preview plan, show usage card
+                if (userPlan === "preview") {
+                    renderUsageCard(user.uid);
+                }
 
                 // Initialize QR Code management
                 initQRManager(user.uid, restData.businessName);
@@ -74,6 +88,80 @@ onAuthStateChanged(auth, async (user) => {
         }
     }
 });
+
+/**
+ * Renders the Preview Plan Usage card
+ * @param {string} uid
+ */
+async function renderUsageCard(uid) {
+    const usageSection = document.getElementById("plan-usage-section");
+    if (!usageSection) return;
+
+    try {
+        const q = query(
+            collection(db, "menuItems"),
+            where("restaurantId", "==", uid)
+        );
+        const querySnapshot = await getDocs(q);
+
+        const usage = {
+            "Main Courses": 0,
+            "Drinks": 0,
+            "Starters": 0,
+            "Desserts": 0
+        };
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const normalized = getNormalizedCategory(data.category);
+            if (normalized && usage.hasOwnProperty(normalized)) {
+                usage[normalized]++;
+            }
+        });
+
+        usageSection.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="margin-bottom: 0;">Preview Plan Usage</h3>
+                <span class="badge badge-featured">Preview Plan</span>
+            </div>
+            <div class="usage-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">Main Courses</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Main Courses"]} / 4</div>
+                </div>
+                <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">Drinks</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Drinks"]} / 2</div>
+                </div>
+                <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">Starters</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Starters"]} / 2</div>
+                </div>
+                <div class="stat-card" style="padding: 1rem; background: var(--bg-light);">
+                    <div style="font-size: 0.875rem; color: var(--text-muted);">Desserts</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">${usage["Desserts"]} / 2</div>
+                </div>
+            </div>
+            <p style="margin-bottom: 0; font-size: 0.875rem;">Upgrade to Pro to unlock unlimited menus.</p>
+        `;
+        usageSection.classList.remove("hidden");
+    } catch (error) {
+        console.error("Error rendering usage card:", error);
+    }
+}
+
+/**
+ * Normalizes category name (duplicated from menu-items.js for dashboard display)
+ */
+function getNormalizedCategory(category) {
+    if (!category) return null;
+    const cat = category.toLowerCase().trim();
+    if (cat === "main" || cat === "mains" || cat === "main courses" || cat === "main course") return "Main Courses";
+    if (cat === "starter" || cat === "starters") return "Starters";
+    if (cat === "drink" || cat === "drinks") return "Drinks";
+    if (cat === "dessert" || cat === "desserts") return "Desserts";
+    return null;
+}
 
 if (editProfileBtn) {
     editProfileBtn.addEventListener("click", () => {

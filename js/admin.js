@@ -125,6 +125,7 @@ async function loadUsers(searchTerm = "") {
                 uid: doc.id,
                 email: data.email || "",
                 username: data.email ? data.email.split('@')[0] : "N/A",
+                plan: data.plan || "preview",
                 createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
                 hasRestaurant: restaurantUids.has(doc.id)
             });
@@ -161,6 +162,7 @@ function renderUsersTable(users) {
             <td>${user.email}</td>
             <td>${user.username}</td>
             <td style="font-family: monospace; font-size: 0.75rem;">${user.uid}</td>
+            <td><span class="badge ${user.plan === 'pro' ? 'badge-featured' : ''}">${user.plan}</span></td>
             <td>${user.createdAt.toLocaleDateString()}</td>
             <td>${user.hasRestaurant ? '✅ Yes' : '❌ No'}</td>
         `;
@@ -276,13 +278,14 @@ function exportUsersCSV() {
     if (usersData.length === 0) return;
 
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Email,Username,UID,Registration Date,Restaurant Status\n";
+    csvContent += "Email,Username,UID,Plan,Registration Date,Restaurant Status\n";
 
     usersData.forEach(u => {
         const row = [
             u.email,
             u.username,
             u.uid,
+            u.plan,
             u.createdAt.toISOString(),
             u.hasRestaurant ? "Yes" : "No"
         ].join(",");

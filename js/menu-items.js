@@ -25,13 +25,16 @@ const categorySelect = document.getElementById("item-category");
 const customCategoryGroup = document.getElementById("custom-category-group");
 
 let currentUserId = null;
+let currentUserPlan = "preview";
 
 /**
  * Initializes the Menu Builder
  * @param {string} uid
+ * @param {string} plan
  */
-export function initMenuItems(uid) {
+export function initMenuItems(uid, plan = "preview") {
     currentUserId = uid;
+    currentUserPlan = plan;
 
     if (addMenuItemBtn) {
         addMenuItemBtn.addEventListener("click", () => openModal());
@@ -145,6 +148,64 @@ async function handleFormSubmit(e) {
         featured,
         updatedAt: serverTimestamp()
     };
+
+    // Plan validation
+    if (currentUserPlan === "preview") {
+        const normalizedCategory = getNormalizedCategory(category);
+        if (normalizedCategory) {
+            const limits = {
+                "Main Courses": 4,
+                "Drinks": 2,
+                "Starters": 2,
+                "Desserts": 2
+            };
+            const limit = limits[normalizedCategory];
+
+            try {
+                const q = query(
+                    collection(db, "menuItems"),
+                    where("restaurantId", "==", currentUserId)
+                );
+                const querySnapshot = await getDocs(q);
+                let count = 0;
+                querySnapshot.forEach((doc) => {
+                    if (getNormalizedCategory(doc.data().category) === normalizedCategory) {
+                        count++;
+                    }
+                });
+
+                // If editing, don't count the item itself
+                let effectiveCount = count;
+                if (itemId) {
+                    const existingItem = querySnapshot.docs.find(doc => doc.id === itemId);
+                    if (existingItem && getNormalizedCategory(existingItem.data().category) === normalizedCategory) {
+                        // Already in this category, count remains same (or technically 1 of the count is us)
+                    } else {
+                        // Moving into this restricted category from another
+                    }
+                }
+
+                // Actually, if we are in the category, we stay. If we are entering it, we check limit.
+                // Simpler: if we are ALREADY in the category, we allow save.
+                // If we are NOT in the category and want to move into it (or it's a new item), we check if count < limit.
+
+                let isAlreadyInThisCategory = false;
+                if (itemId) {
+                    const existingItem = querySnapshot.docs.find(doc => doc.id === itemId);
+                    if (existingItem && getNormalizedCategory(existingItem.data().category) === normalizedCategory) {
+                        isAlreadyInThisCategory = true;
+                    }
+                }
+
+                if (!isAlreadyInThisCategory && count >= limit) {
+                    showError(`You've reached the Preview Plan limit for ${normalizedCategory} (${limit}). Upgrade to Pro to unlock unlimited menu items.`);
+                    return;
+                }
+            } catch (error) {
+                console.error("Error checking plan limits:", error);
+            }
+        }
+    }
 
     // Debug logging
     console.log("auth.currentUser.uid:", auth.currentUser ? auth.currentUser.uid : "null");
@@ -321,6 +382,31 @@ function showError(message) {
     } else {
         alert(message);
     }
+}
+
+/**
+ * Normalizes category name for plan limit checks
+ * @param {string} category
+ * @returns {string|null}
+ */
+function getNormalizedCategory(category) {
+    if (!category) return null;
+    const cat = category.toLowerCase().trim();
+
+    if (cat === "main" || cat === "mains" || cat === "main courses" || cat === "main course") {
+        return "Main Courses";
+    }
+    if (cat === "starter" || cat === "starters") {
+        return "Starters";
+    }
+    if (cat === "drink" || cat === "drinks") {
+        return "Drinks";
+    }
+    if (cat === "dessert" || cat === "desserts") {
+        return "Desserts";
+    }
+
+    return null;
 }
 
 /**
