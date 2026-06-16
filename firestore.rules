@@ -16,7 +16,15 @@ service cloud.firestore {
     // User profile rules
     match /users/{userId} {
       allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
-      allow write: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      allow update: if (request.auth != null && request.auth.uid == userId &&
+                        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['plan', 'subscriptionActivatedAt', 'activatedBy', 'subscriptionExpiry']))
+                    || (isAdmin() &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plan', 'subscriptionActivatedAt', 'activatedBy', 'subscriptionExpiry']));
+
+      allow delete: if isAdmin();
     }
 
     // Restaurant profile rules
@@ -27,15 +35,16 @@ service cloud.firestore {
       // Allow create and update if the user is the owner
       allow create, update: if request.auth != null && request.auth.uid == uid;
 
-      // Explicitly deny delete
-      allow delete: if false;
+      // Allow delete if admin
+      allow delete: if isAdmin();
     }
 
     // Menu Category rules
     match /menuCategories/{categoryId} {
       allow create: if request.auth != null && request.resource.data.restaurantId == request.auth.uid;
       allow read: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isAdmin();
-      allow update, delete: if request.auth != null && resource.data.restaurantId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.restaurantId == request.auth.uid;
+      allow delete: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isAdmin();
     }
 
     // Menu Item rules
@@ -45,7 +54,8 @@ service cloud.firestore {
 
       // Owner write access
       allow create: if request.auth != null && request.resource.data.restaurantId == request.auth.uid;
-      allow update, delete: if request.auth != null && resource.data.restaurantId == request.auth.uid;
+      allow update: if request.auth != null && resource.data.restaurantId == request.auth.uid;
+      allow delete: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isAdmin();
     }
   }
 }

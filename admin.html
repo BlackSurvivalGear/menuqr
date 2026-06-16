@@ -126,6 +126,47 @@
         </div>
     </main>
 
+    <!-- Delete User Confirmation Modal -->
+    <div id="delete-user-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 500px; border-top: 5px solid var(--error-color);">
+            <div class="modal-header">
+                <h3 style="color: var(--error-color);">WARNING: Permanent Deletion</h3>
+                <span class="close-modal" id="close-delete-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>You are about to permanently delete this user.</p>
+
+                <div style="background: #fff5f5; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid #feb2b2;">
+                    <div class="detail-item" style="border: none; padding: 0.25rem 0;">
+                        <span class="label">User:</span>
+                        <span id="delete-modal-user-email" class="value" style="font-weight: 600;"></span>
+                    </div>
+                    <div class="detail-item" style="border: none; padding: 0.25rem 0;">
+                        <span class="label">Restaurant:</span>
+                        <span id="delete-modal-biz-name" class="value" style="font-weight: 600;"></span>
+                    </div>
+                </div>
+
+                <p style="font-weight: 600; color: var(--text-color);">This action cannot be undone. The following data will be removed:</p>
+                <ul style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem; padding-left: 1.25rem;">
+                    <li>User account</li>
+                    <li>Restaurant profile</li>
+                    <li>Menu items</li>
+                    <li>Menu categories</li>
+                    <li>QR data references</li>
+                    <li>Subscription information</li>
+                </ul>
+
+                <p style="margin-bottom: 0.75rem; font-size: 0.875rem;">Type <strong>DELETE</strong> to continue.</p>
+                <input type="text" id="delete-confirm-input" class="form-control" placeholder="DELETE" style="text-transform: uppercase;">
+            </div>
+            <div class="form-actions" style="margin-top: 1rem;">
+                <button id="cancel-delete-btn" class="btn btn-outline">Cancel</button>
+                <button id="permanently-delete-btn" class="btn btn-error" disabled style="background-color: var(--error-color); color: white;">Permanently Delete User</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Subscription Confirmation Modal -->
     <div id="subscription-modal" class="modal hidden">
         <div class="modal-content">
