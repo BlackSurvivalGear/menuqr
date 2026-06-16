@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - ScanMenu.Africa</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="bg-light">
-    <header class="dashboard-header">
+    <header>
         <nav class="container">
-            <div class="logo">
-                <img src="favi.png" alt="ScanMenu.Africa Favicon" class="logo-icon">
+            <a href="index.html" class="logo">
+                <img src="favi.png" alt="ScanMenu.Africa" class="logo-icon">
                 <span>ScanMenu.Africa</span>
-                <span id="plan-badge" class="badge" style="margin-left: 0.5rem; display: none;">Preview</span>
-            </div>
-            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span id="plan-badge" class="badge" style="display: none;">Preview</span>
+            </a>
+            <div class="nav-links">
                 <a href="pricing.html" class="btn btn-outline btn-small">Plans & Pricing</a>
                 <button id="logout-btn" class="btn btn-outline btn-small">Logout</button>
             </div>
@@ -67,52 +70,88 @@
                         <input type="checkbox" id="item-featured"> Featured Item
                     </label>
                 </div>
-                <div class="form-actions">
-                    <button type="button" id="cancel-item-btn" class="btn btn-outline">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Item</button>
+                <div class="form-actions" style="margin-top: 1.5rem; display: flex; gap: 0.75rem;">
+                    <button type="button" id="cancel-item-btn" class="btn btn-outline" style="flex: 1;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Item</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <main class="container dashboard-watermark">
-        <div class="dashboard-content">
-            <section id="plan-usage-section" class="account-details hidden" style="margin-top: 1.5rem;"></section>
+    <main class="dashboard-watermark">
+        <div class="container dashboard-content">
 
             <section class="welcome-card">
-                <h2>Welcome, <span id="user-display-email">User</span>!</h2>
-                <p>You are successfully logged in to your ScanMenu.Africa dashboard.</p>
+                <h2>👋 Welcome, <span id="user-display-email">User</span>!</h2>
+                <p>You are successfully logged in to your ScanMenu.Africa dashboard. Manage your restaurant profile, menu, and QR codes below.</p>
             </section>
 
-            <section id="restaurant-details" class="account-details">
-                <h3>Restaurant Profile</h3>
-                <div class="detail-item">
-                    <span class="label">Business Name:</span>
-                    <span id="biz-name" class="value">Loading...</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Owner Name:</span>
-                    <span id="owner-name" class="value">Loading...</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Phone:</span>
-                    <span id="biz-phone" class="value">Loading...</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">WhatsApp:</span>
-                    <span id="biz-whatsapp" class="value">Loading...</span>
-                </div>
-                <div class="detail-item" style="flex-direction: column; align-items: flex-start;">
-                    <span class="label">Address:</span>
-                    <span id="biz-address" class="value" style="margin-top: 0.5rem;">Loading...</span>
-                </div>
-                <div style="margin-top: 1.5rem;">
-                    <button id="edit-profile-btn" class="btn btn-outline btn-full">Edit Restaurant Profile</button>
-                </div>
-            </section>
+            <section id="plan-usage-section" class="account-details hidden" style="margin-bottom: 1.5rem;"></section>
 
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <!-- Restaurant Profile -->
+                <section id="restaurant-details" class="account-details">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span>Restaurant Profile</span>
+                    </h3>
+                    <div class="detail-item" style="margin-bottom: 0.75rem; border-bottom: 1px solid var(--bg-light); padding-bottom: 0.5rem;">
+                        <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">Business Name</span>
+                        <span id="biz-name" class="value" style="font-weight: 600;">Loading...</span>
+                    </div>
+                    <div class="detail-item" style="margin-bottom: 0.75rem; border-bottom: 1px solid var(--bg-light); padding-bottom: 0.5rem;">
+                        <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">Owner Name</span>
+                        <span id="owner-name" class="value">Loading...</span>
+                    </div>
+                    <div class="detail-item" style="margin-bottom: 0.75rem; border-bottom: 1px solid var(--bg-light); padding-bottom: 0.5rem;">
+                        <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">Phone</span>
+                        <span id="biz-phone" class="value">Loading...</span>
+                    </div>
+                    <div class="detail-item" style="margin-bottom: 0.75rem; border-bottom: 1px solid var(--bg-light); padding-bottom: 0.5rem;">
+                        <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">WhatsApp</span>
+                        <span id="biz-whatsapp" class="value">Loading...</span>
+                    </div>
+                    <div class="detail-item" style="margin-bottom: 1.5rem;">
+                        <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">Address</span>
+                        <span id="biz-address" class="value">Loading...</span>
+                    </div>
+                    <button id="edit-profile-btn" class="btn btn-outline btn-full">Edit Profile</button>
+                </section>
+
+                <!-- QR Code Section -->
+                <section id="qr-code-section" class="account-details">
+                    <h3>QR Code</h3>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1rem;">Instant access for your customers.</p>
+
+                    <div class="qr-container" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                        <div id="qr-preview-container" class="qr-preview-box" style="background: var(--bg-light); padding: 1rem; border-radius: var(--radius-sm); border: 1px dashed var(--border-color); width: 100%; display: flex; align-items: center; justify-content: center; min-height: 200px;">
+                            <div class="qr-placeholder">
+                                <p>No QR Generated</p>
+                            </div>
+                        </div>
+
+                        <div id="qr-details" class="qr-details hidden" style="width: 100%; font-size: 0.85rem;">
+                            <div class="detail-item">
+                                <span class="label">Menu Link:</span>
+                                <span id="qr-public-url" class="value" style="word-break: break-all;">-</span>
+                            </div>
+                        </div>
+
+                        <div class="qr-actions" style="width: 100%;">
+                            <button id="generate-qr-btn" class="btn btn-primary btn-full">Generate QR Code</button>
+                            <div id="qr-download-actions" class="hidden" style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                <button id="download-qr-btn" class="btn btn-outline btn-small" style="flex: 1;">Download</button>
+                                <button id="copy-link-btn" class="btn btn-outline btn-small" style="flex: 1;">Copy Link</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="qr-message" class="error-box hidden" style="background-color: #dcfce7; color: #166534; border-color: #bbf7d0;"></div>
+                    <div id="qr-error" class="error-box hidden"></div>
+                </section>
+            </div>
+
+            <!-- Menu Builder -->
             <section id="menu-builder-section" class="account-details" style="margin-top: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h3 style="margin-bottom: 0;">Menu Builder</h3>
                     <button id="add-menu-item-btn" class="btn btn-primary btn-small">+ Add Menu Item</button>
                 </div>
@@ -123,53 +162,22 @@
                 <div id="menu-error" class="error-box hidden"></div>
             </section>
 
-            <section id="qr-code-section" class="account-details" style="margin-top: 1.5rem;">
-                <h3>QR Code</h3>
-                <p>Print this QR code and place it on restaurant tables so customers can instantly access your menu.</p>
-
-                <div class="qr-container">
-                    <div id="qr-preview-container" class="qr-preview-box">
-                        <div class="qr-placeholder">
-                            <p>No QR Code Generated</p>
-                        </div>
-                    </div>
-
-                    <div id="qr-details" class="qr-details hidden">
-                        <div class="detail-item">
-                            <span class="label">Restaurant:</span>
-                            <span id="qr-biz-name" class="value">-</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="label">Menu Link:</span>
-                            <span id="qr-public-url" class="value">-</span>
-                        </div>
-                    </div>
-
-                    <div class="qr-actions">
-                        <button id="generate-qr-btn" class="btn btn-primary btn-full">Generate QR Code</button>
-                        <div id="qr-download-actions" class="hidden" style="gap: 0.5rem; margin-top: 0.5rem;">
-                            <button id="download-qr-btn" class="btn btn-outline" style="flex: 1;">Download PNG</button>
-                            <button id="copy-link-btn" class="btn btn-outline" style="flex: 1;">Copy Menu Link</button>
-                        </div>
-                    </div>
-                    <div id="qr-message" class="error-box hidden" style="background-color: #dcfce7; color: #166534; border-color: #bbf7d0;"></div>
-                    <div id="qr-error" class="error-box hidden"></div>
-                </div>
-            </section>
-
+            <!-- Account Settings -->
             <section class="account-details" style="margin-top: 1.5rem;">
                 <h3>Account Information</h3>
-                <div class="detail-item">
-                    <span class="label">Email Address:</span>
-                    <span id="user-email" class="value">Loading...</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">User UID:</span>
-                    <span id="user-uid" class="value">Loading...</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Created At:</span>
-                    <span id="user-created-at" class="value">Loading...</span>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div class="detail-item">
+                        <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">Email Address</span>
+                        <span id="user-email" class="value">Loading...</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">Registration Date</span>
+                        <span id="user-created-at" class="value">Loading...</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label" style="font-size: 0.8rem; color: var(--text-muted); display: block;">User ID</span>
+                        <span id="user-uid" class="value" style="font-size: 0.75rem; color: var(--text-muted);">Loading...</span>
+                    </div>
                 </div>
             </section>
         </div>
@@ -192,7 +200,7 @@
                 </ul>
                 <p style="font-weight: 600; color: var(--text-color);">Upgrade to go live with your complete restaurant menu.</p>
                 <div style="margin-top: 2rem;">
-                    <button class="btn btn-primary btn-full" onclick="document.getElementById('upgrade-modal').classList.add('hidden')">Got it</button>
+                    <a href="pricing.html" class="btn btn-primary btn-full">View Plans & Pricing</a>
                 </div>
             </div>
         </div>

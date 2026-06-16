@@ -10,10 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="bg-light">
-    <header class="dashboard-header">
+    <header>
         <nav class="container">
             <a href="index.html" class="logo">
-                <span class="text-primary">ScanMenu</span>.Africa
+                <img src="favi.png" alt="ScanMenu.Africa" class="logo-icon">
+                <span>ScanMenu.Africa</span>
             </a>
             <div class="nav-links">
                 <a href="dashboard.html" class="btn btn-outline">Dashboard</a>
@@ -22,70 +23,84 @@
         </nav>
     </header>
 
-    <main class="container">
-        <div style="text-align: center; margin-bottom: 3rem; margin-top: 2rem;">
-            <h1>Simple, Transparent Pricing</h1>
-            <p style="font-size: 1.25rem;">Choose the plan that's right for your restaurant.</p>
-        </div>
+    <main>
+        <section class="pricing-hero">
+            <div class="container">
+                <h1>Choose the plan that's right for your restaurant.</h1>
+                <p>Simple, affordable digital menus designed for Africa.</p>
+            </div>
+        </section>
 
-        <div class="pricing-grid">
-            <!-- Preview Plan -->
-            <div class="pricing-card" id="card-preview">
-                <h3 class="plan-name">Preview Plan</h3>
-                <div class="plan-price">FREE</div>
-                <p>Perfect for exploring the platform before launching.</p>
-                <ul class="plan-features">
-                    <li><span class="feature-icon">✓</span> Public Menus</li>
-                    <li><span class="feature-icon">✓</span> QR Code Generation</li>
-                    <li><span class="feature-icon">✓</span> WhatsApp Ordering</li>
-                    <li><span class="feature-icon">✓</span> Shopping Cart</li>
-                    <li><span class="feature-icon">✓</span> Customer Details Collection</li>
-                    <li class="feature-locked"><span class="feature-icon">🔒</span> Sides & Specials</li>
-                    <li class="feature-locked"><span class="feature-icon">🔒</span> Custom Categories</li>
-                    <li style="color: var(--error-color); font-weight: 600;">Limits: 4 Mains, 2 Starters, 2 Drinks, 2 Desserts</li>
-                </ul>
-                <button class="btn btn-outline btn-full upgrade-btn" data-plan="preview" id="btn-preview">Current Plan</button>
+        <div class="container">
+            <div class="pricing-grid">
+                <!-- Preview Plan -->
+                <div class="pricing-card" id="card-preview">
+                    <h3 class="plan-name">Preview Plan</h3>
+                    <div class="plan-price">FREE</div>
+                    <p class="text-muted">Perfect for exploring the platform before launching.</p>
+                    <div style="margin-top: 1.5rem; margin-bottom: 1rem; font-weight: 700; color: var(--text-color);">Preview Limits</div>
+                    <ul class="plan-features">
+                        <li><span class="feature-icon">•</span> 4 Main Courses</li>
+                        <li><span class="feature-icon">•</span> 2 Starters</li>
+                        <li><span class="feature-icon">•</span> 2 Drinks</li>
+                        <li><span class="feature-icon">•</span> 2 Desserts</li>
+                        <li><span class="feature-icon">✓</span> Public Menus</li>
+                        <li><span class="feature-icon">✓</span> QR Code Generation</li>
+                        <li><span class="feature-icon">✓</span> WhatsApp Ordering</li>
+                        <li><span class="feature-icon">✓</span> Shopping Cart</li>
+                        <li><span class="feature-icon">✓</span> Customer Details Collection</li>
+                        <li class="feature-locked"><span class="feature-icon">🔒</span> Sides & Specials</li>
+                        <li class="feature-locked"><span class="feature-icon">🔒</span> Custom Categories</li>
+                    </ul>
+                    <button class="btn btn-outline btn-full upgrade-btn" data-plan="preview" id="btn-preview">Current Plan</button>
+                </div>
+
+                <!-- Standard Plan -->
+                <div class="pricing-card featured" id="card-standard">
+                    <span class="plan-badge badge-recommended">RECOMMENDED</span>
+                    <h3 class="plan-name">Standard Plan</h3>
+                    <div class="plan-price">$9.99<span>/year</span></div>
+                    <p class="price-subtext">Less than $1/month</p>
+                    <p class="text-muted">Everything you need for a growing restaurant.</p>
+                    <ul class="plan-features">
+                        <li><span class="feature-icon">✓</span> Up to 50 Menu Items</li>
+                        <li><span class="feature-icon">✓</span> Sides</li>
+                        <li><span class="feature-icon">✓</span> Specials</li>
+                        <li><span class="feature-icon">✓</span> Public Menus</li>
+                        <li><span class="feature-icon">✓</span> QR Code Generation</li>
+                        <li><span class="feature-icon">✓</span> WhatsApp Ordering</li>
+                        <li><span class="feature-icon">✓</span> Shopping Cart</li>
+                        <li><span class="feature-icon">✓</span> Standard Support</li>
+                        <li class="feature-locked"><span class="feature-icon">🔒</span> Custom Categories</li>
+                        <li class="feature-locked"><span class="feature-icon">🔒</span> Restaurant Logo Upload</li>
+                    </ul>
+                    <button class="btn btn-primary btn-full upgrade-btn" data-plan="standard" id="btn-standard">Upgrade</button>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="pricing-card premium" id="card-pro">
+                    <span class="plan-badge badge-premium">PREMIUM</span>
+                    <h3 class="plan-name">Pro Plan</h3>
+                    <div class="plan-price">$49.99<span>/year</span></div>
+                    <p class="price-subtext" style="color: var(--secondary-hover);">About $4/month</p>
+                    <p class="text-muted">Full flexibility and advanced branding for your brand.</p>
+                    <ul class="plan-features">
+                        <li><span class="feature-icon">✓</span> Unlimited Menu Items</li>
+                        <li><span class="feature-icon">✓</span> Unlimited Categories</li>
+                        <li><span class="feature-icon">✓</span> Custom Categories</li>
+                        <li><span class="feature-icon">✓</span> Restaurant Logo Upload</li>
+                        <li><span class="feature-icon">✓</span> Logo in QR Codes</li>
+                        <li><span class="feature-icon">✓</span> Featured Menu Items</li>
+                        <li><span class="feature-icon">✓</span> Priority Support</li>
+                        <li><span class="feature-icon">✓</span> Future Analytics</li>
+                    </ul>
+                    <button class="btn btn-secondary btn-full upgrade-btn" data-plan="pro" id="btn-pro">Upgrade</button>
+                </div>
             </div>
 
-            <!-- Standard Plan -->
-            <div class="pricing-card featured" id="card-standard">
-                <h3 class="plan-name">Standard Plan</h3>
-                <div class="plan-price">$9.99<span>/year</span></div>
-                <p>Everything you need for a growing restaurant.</p>
-                <ul class="plan-features">
-                    <li><span class="feature-icon">✓</span> <strong>Up to 50 Menu Items</strong></li>
-                    <li><span class="feature-icon">✓</span> All categories (Sides/Specials)</li>
-                    <li><span class="feature-icon">✓</span> Public Menus</li>
-                    <li><span class="feature-icon">✓</span> QR Code Generation</li>
-                    <li><span class="feature-icon">✓</span> WhatsApp Ordering</li>
-                    <li><span class="feature-icon">✓</span> Shopping Cart</li>
-                    <li><span class="feature-icon">✓</span> Standard Support</li>
-                    <li class="feature-locked"><span class="feature-icon">🔒</span> Custom Categories</li>
-                    <li class="feature-locked"><span class="feature-icon">🔒</span> Restaurant Logo Upload</li>
-                </ul>
-                <button class="btn btn-primary btn-full upgrade-btn" data-plan="standard" id="btn-standard">Upgrade</button>
+            <div style="margin-top: 4rem; text-align: center; padding-bottom: 4rem;">
+                <p>Need help choosing a plan? Contact us at <strong>support@scanmenu.africa</strong></p>
             </div>
-
-            <!-- Pro Plan -->
-            <div class="pricing-card" id="card-pro">
-                <h3 class="plan-name">Pro Plan</h3>
-                <div class="plan-price">$49.99<span>/year</span></div>
-                <p>Full flexibility and advanced branding for your brand.</p>
-                <ul class="plan-features">
-                    <li><span class="feature-icon">✓</span> <strong>Unlimited Menu Items</strong></li>
-                    <li><span class="feature-icon">✓</span> <strong>Custom Categories</strong></li>
-                    <li><span class="feature-icon">✓</span> Restaurant Logo Upload</li>
-                    <li><span class="feature-icon">✓</span> Logo in QR Codes</li>
-                    <li><span class="feature-icon">✓</span> Featured Menu Items</li>
-                    <li><span class="feature-icon">✓</span> Priority Support</li>
-                    <li><span class="feature-icon">✓</span> Future Analytics</li>
-                </ul>
-                <button class="btn btn-secondary btn-full upgrade-btn" data-plan="pro" id="btn-pro">Upgrade</button>
-            </div>
-        </div>
-
-        <div style="margin-top: 4rem; text-align: center; padding-bottom: 4rem;">
-            <p>Need help choosing a plan? Contact us at <strong>support@scanmenu.africa</strong></p>
         </div>
     </main>
 
