@@ -36,6 +36,7 @@ function showError(title, message) {
     if (menuLayout) menuLayout.classList.add("hidden");
     if (mobileCartSummary) mobileCartSummary.classList.add("hidden");
     if (cartPanel) cartPanel.classList.add("hidden");
+    if (drawerOverlay) drawerOverlay.classList.remove("active");
     if (errorScreen) {
         errorScreen.classList.remove("hidden");
         if (errorTitle) errorTitle.textContent = title;
@@ -117,7 +118,7 @@ function renderRestaurantDetails(data) {
             const header = resName.closest('.restaurant-header');
             if (header) {
                 header.prepend(logoContainer);
-            } else {
+            } else if (resName.parentNode) {
                 resName.parentNode.insertBefore(logoContainer, resName);
             }
         }
@@ -127,7 +128,8 @@ function renderRestaurantDetails(data) {
     if (resAddress) resAddress.textContent = data.address || "";
 
     if (data.whatsapp && resWhatsapp) {
-        resWhatsapp.href = `https://wa.me/${data.whatsapp.replace(/\D/g, '')}`;
+        const whatsappStr = String(data.whatsapp);
+        resWhatsapp.href = `https://wa.me/${whatsappStr.replace(/\D/g, '')}`;
         resWhatsapp.classList.remove("hidden");
     }
 }
@@ -266,19 +268,32 @@ async function init() {
             return;
         }
 
-        renderRestaurantDetails(restaurantData);
+        try {
+            renderRestaurantDetails(restaurantData);
+        } catch (e) {
+            console.error("Error rendering restaurant details:", e);
+        }
 
         const menuItems = await fetchMenuItems(restaurantUid);
-        if (menuItems.length === 0) {
-            renderEmptyMenu();
-        } else {
-            renderMenu(menuItems);
+        try {
+            if (menuItems.length === 0) {
+                renderEmptyMenu();
+            } else {
+                renderMenu(menuItems);
+            }
+        } catch (e) {
+            console.error("Error rendering menu items:", e);
         }
 
         showMenu();
     } catch (error) {
         console.error("Error loading menu:", error);
         showError("Error", "Something went wrong while loading the menu.");
+    } finally {
+        // Ensure loading screen is hidden in all cases where it might have been left visible
+        if (loadingScreen && !loadingScreen.classList.contains('hidden')) {
+            loadingScreen.classList.add('hidden');
+        }
     }
 }
 
@@ -322,12 +337,12 @@ function updateQuantity(itemId, delta) {
  */
 function toggleCartDrawer(isOpen) {
     if (isOpen) {
-        cartPanel.classList.add("drawer-open");
-        drawerOverlay.classList.add("active");
+        if (cartPanel) cartPanel.classList.add("drawer-open");
+        if (drawerOverlay) drawerOverlay.classList.add("active");
         document.body.style.overflow = "hidden"; // Prevent scrolling
     } else {
-        cartPanel.classList.remove("drawer-open");
-        drawerOverlay.classList.remove("active");
+        if (cartPanel) cartPanel.classList.remove("drawer-open");
+        if (drawerOverlay) drawerOverlay.classList.remove("active");
         document.body.style.overflow = ""; // Restore scrolling
     }
 }
