@@ -12,26 +12,34 @@
         <p style="margin-top: 1rem;">Loading Menu...</p>
     </div>
 
-    <div id="menu-container" class="public-menu hidden">
-        <header class="restaurant-header">
-            <h1 id="res-name" class="restaurant-name"></h1>
-            <p id="res-address" class="restaurant-info"></p>
-            <a id="res-whatsapp" href="#" class="whatsapp-link hidden">
-                <span>Message on WhatsApp</span>
-            </a>
-        </header>
+    <div id="menu-layout" class="menu-layout-wrapper hidden">
+        <div id="menu-container" class="public-menu">
+            <header class="restaurant-header">
+                <h1 id="res-name" class="restaurant-name"></h1>
+                <p id="res-address" class="restaurant-info"></p>
+                <a id="res-whatsapp" href="#" class="whatsapp-link hidden">
+                    <span>Message on WhatsApp</span>
+                </a>
+            </header>
 
-        <main id="menu-content">
-            <!-- Menu items will be injected here -->
-        </main>
+            <main id="menu-content">
+                <!-- Menu items will be injected here -->
+            </main>
 
-        <footer style="margin-top: 4rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
-            <p>Powered by ScanMenu.Africa</p>
-        </footer>
+            <footer style="margin-top: 4rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+                <p>Powered by ScanMenu.Africa</p>
+            </footer>
+        </div>
+
+        <!-- Cart Panel (Sticky on Desktop, Drawer on Mobile) -->
+        <div id="cart-panel" class="cart-panel hidden"></div>
     </div>
 
-    <!-- Sticky Cart Panel -->
-    <div id="cart-panel" class="cart-panel hidden"></div>
+    <!-- Fixed Bottom Summary for Mobile -->
+    <div id="mobile-cart-summary" class="cart-summary-fixed hidden"></div>
+
+    <!-- Overlay for Drawer -->
+    <div id="drawer-overlay" class="drawer-overlay"></div>
 
     <div id="error-screen" class="empty-state hidden">
         <h2 id="error-title">Unavailable</h2>

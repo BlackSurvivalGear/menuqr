@@ -166,6 +166,8 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 0;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .logo {
@@ -186,10 +188,28 @@ nav {
     width: 32px;
     height: 32px;
     object-fit: contain;
+    flex-shrink: 0;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .nav-links .btn {
-    margin-left: 1rem;
+    margin-left: 0;
+}
+
+@media (max-width: 640px) {
+    .logo span {
+        font-size: 1.25rem;
+    }
+
+    .nav-links {
+        width: 100%;
+        justify-content: flex-end;
+    }
 }
 
 /* Header (used in dashboard/pricing etc) */
@@ -825,10 +845,35 @@ header {
 }
 
 /* Public Menu Styles */
+.menu-layout-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+@media (min-width: 1024px) {
+    .menu-layout-wrapper {
+        display: grid;
+        grid-template-columns: 7fr 3fr;
+        gap: 2.5rem;
+        align-items: start;
+        padding: 3rem 1.5rem;
+    }
+}
+
 .public-menu {
+    width: 100%;
     max-width: 800px;
     margin: 0 auto;
     padding: 3rem 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .public-menu {
+        padding: 0;
+        margin: 0;
+        max-width: none;
+    }
 }
 
 .restaurant-header {
@@ -1133,6 +1178,10 @@ footer {
     .item-main {
         padding-right: 0;
     }
+}
+
+.cart-summary-fixed {
+    display: none;
 }
 
 /* Utilities */
@@ -1455,6 +1504,22 @@ tr:hover {
     overflow-y: auto;
 }
 
+@media (min-width: 1024px) {
+    .cart-panel {
+        position: sticky;
+        top: 2rem;
+        bottom: auto;
+        left: auto;
+        transform: none;
+        width: 100%;
+        max-width: none;
+        border-radius: var(--radius);
+        box-shadow: var(--card-shadow);
+        max-height: calc(100vh - 4rem);
+        margin-top: 3rem;
+    }
+}
+
 .cart-header {
     display: flex;
     justify-content: space-between;
@@ -1550,10 +1615,110 @@ tr:hover {
     align-items: center;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1023px) {
     .cart-panel {
-        max-width: 100%;
-        border-radius: 0;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        transform: translateY(100%);
+        width: 100%;
+        max-width: none;
+        background: white;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
+        border-radius: 1.5rem 1.5rem 0 0;
+        padding: 2rem 1.5rem;
+        z-index: 2000;
+        max-height: 85vh;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+    }
+
+    .cart-panel.drawer-open {
+        transform: translateY(0);
+    }
+
+    /* Fixed Bottom Compact Summary */
+    .cart-summary-fixed {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: var(--primary-color);
+        color: white;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1500;
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+
+    .cart-summary-fixed.hidden {
+        transform: translateY(100%);
+    }
+
+    .cart-summary-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 700;
+    }
+
+    .cart-summary-count {
+        background: white;
+        color: var(--primary-color);
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+    }
+
+    .cart-summary-label {
+        font-size: 1rem;
+    }
+
+    .cart-summary-total {
+        font-size: 1.125rem;
+        font-weight: 800;
+    }
+
+    /* Overlay for mobile drawer */
+    .drawer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1900;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
+
+    .drawer-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .close-drawer-btn {
+        background: var(--bg-light);
+        border: none;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--text-muted);
+        cursor: pointer;
     }
 }
 
