@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import firebaseConfig from "./firebase-config.js";
 
 // Initialize Firebase
@@ -26,6 +26,10 @@ const menuLayout = document.getElementById("menu-layout");
 
 const errorTitle = document.getElementById("error-title");
 const errorMessage = document.getElementById("error-message");
+
+const orderModal = document.getElementById("order-modal");
+const successModal = document.getElementById("success-modal");
+const orderForm = document.getElementById("order-form");
 
 /**
  * Show error screen
@@ -406,9 +410,14 @@ function renderCart() {
             <span>Total:</span>
             <span>${currencySymbol}${total.toFixed(2)}</span>
         </div>
-        <button class="btn btn-whatsapp-order" onclick="sendWhatsAppOrder()">
-            Order via WhatsApp
-        </button>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem;">
+            <button class="btn btn-whatsapp-order" onclick="sendWhatsAppOrder()" style="margin-top: 0;">
+                Order via WhatsApp
+            </button>
+            <button class="btn btn-primary btn-full" onclick="toggleOrderModal(true)">
+                Submit Order
+            </button>
+        </div>
     `;
 
     // Show close button on mobile drawer
@@ -499,3 +508,90 @@ window.updateQuantity = updateQuantity;
 window.clearCart = clearCart;
 window.sendWhatsAppOrder = sendWhatsAppOrder;
 window.toggleCartDrawer = toggleCartDrawer;
+window.toggleOrderModal = toggleOrderModal;
+window.toggleSuccessModal = toggleSuccessModal;
+
+/**
+ * Toggle Order Submission Modal
+ */
+function toggleOrderModal(show) {
+    if (show) {
+        orderModal.classList.remove("hidden");
+    } else {
+        orderModal.classList.add("hidden");
+    }
+}
+
+/**
+ * Toggle Success Modal
+ */
+function toggleSuccessModal(show) {
+    if (show) {
+        successModal.classList.remove("hidden");
+    } else {
+        successModal.classList.add("hidden");
+    }
+}
+
+// Handle Order Form Submission
+if (orderForm) {
+    orderForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const customerName = document.getElementById("customer-name").value;
+        const customerPhone = document.getElementById("customer-phone").value;
+
+        if (!customerName || !customerPhone) {
+            alert("Please fill in all required fields.");
+            return;
+        }
+
+        const submitBtn = orderForm.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const restaurantId = urlParams.get("id");
+
+            let total = 0;
+            cart.forEach(item => {
+                total += item.price * item.quantity;
+            });
+
+            const orderData = {
+                restaurantId: restaurantId,
+                restaurantName: currentRestaurantData.businessName || "Restaurant",
+                customerName: customerName,
+                customerPhone: customerPhone,
+                items: cart.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                subtotal: total,
+                currencyCode: currentRestaurantData.currencyCode || "GBP",
+                currencySymbol: currentRestaurantData.currencySymbol || "£",
+                status: "new",
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            };
+
+            await addDoc(collection(firestore, "orders"), orderData);
+
+            // Success
+            toggleOrderModal(false);
+            toggleSuccessModal(true);
+            clearCart();
+            orderForm.reset();
+
+        } catch (error) {
+            console.error("Error submitting order:", error);
+            alert("There was an error submitting your order. Please try again.");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalBtnText;
+        }
+    });
+}
