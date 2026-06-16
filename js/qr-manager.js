@@ -104,11 +104,13 @@ function handleGenerateQR() {
             qrPreviewContainer.appendChild(logoImg);
         }
 
-        qrBizNameEl.textContent = currentBizName;
-        qrPublicUrlEl.textContent = publicMenuUrl;
+        if (qrBizNameEl) qrBizNameEl.textContent = currentBizName;
+        if (qrPublicUrlEl) qrPublicUrlEl.textContent = publicMenuUrl;
 
         qrDetails.classList.remove("hidden");
         qrDownloadActions.classList.remove("hidden");
+
+        console.log("QR Code generated successfully for:", currentBizName);
 
     } catch (error) {
         console.error("QR Generation Error:", error);

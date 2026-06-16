@@ -98,11 +98,16 @@ function renderRestaurantDetails(data) {
         // Check if logo already exists to avoid duplication
         const existingLogo = document.querySelector(".restaurant-logo");
         if (!existingLogo) {
+            const logoContainer = document.createElement("div");
+            logoContainer.className = "logo-container";
+
             const logoImg = document.createElement("img");
             logoImg.src = data.logoUrl;
             logoImg.alt = data.businessName || "Restaurant Logo";
             logoImg.className = "restaurant-logo";
-            resName.parentNode.insertBefore(logoImg, resName);
+
+            logoContainer.appendChild(logoImg);
+            resName.parentNode.insertBefore(logoContainer, resName);
         }
     }
 
