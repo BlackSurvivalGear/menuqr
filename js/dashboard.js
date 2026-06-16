@@ -11,6 +11,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { initMenuItems, updateMenuCurrency } from "./menu-items.js";
 import { initQRManager } from "./qr-manager.js";
+import { initOrders } from "./orders.js";
 
 const userEmailEl = document.getElementById("user-email");
 const userDisplayEmailEl = document.getElementById("user-display-email");
@@ -106,6 +107,9 @@ onAuthStateChanged(auth, async (user) => {
 
                     // Initialize QR Code management
                     initQRManager(user.uid, restData.businessName, restData.logoUrl);
+
+                    // Initialize Orders management
+                    initOrders(user.uid);
                 } else {
                     bizNameEl.innerText = "No profile found";
                     ownerNameEl.innerText = "No profile found";

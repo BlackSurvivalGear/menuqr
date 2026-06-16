@@ -57,5 +57,22 @@ service cloud.firestore {
       allow update: if request.auth != null && resource.data.restaurantId == request.auth.uid;
       allow delete: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isAdmin();
     }
+
+    // Order rules
+    match /orders/{orderId} {
+      // Anyone can create an order
+      allow create: if true;
+
+      // Only the restaurant owner or an admin can read their orders
+      allow read: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isAdmin();
+
+      // Only the restaurant owner can update the status/updatedAt, or an admin can update anything
+      allow update: if (request.auth != null && resource.data.restaurantId == request.auth.uid &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']))
+                    || isAdmin();
+
+      // Only admins can delete orders
+      allow delete: if isAdmin();
+    }
   }
 }
