@@ -183,6 +183,13 @@ async function loadRestaurants(searchTerm = "") {
         const q = query(collection(db, "restaurants"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
 
+        // Fetch all users to get their plans
+        const usersSnapshot = await getDocs(collection(db, "users"));
+        const userPlans = {};
+        usersSnapshot.forEach(doc => {
+            userPlans[doc.id] = doc.data().plan || "preview";
+        });
+
         let restaurants = [];
 
         // Fetch all menu items to count them per restaurant
@@ -202,6 +209,7 @@ async function loadRestaurants(searchTerm = "") {
                 businessName: data.businessName || "N/A",
                 ownerName: data.ownerName || "N/A",
                 ownerEmail: "", // We'll need to link this from users if needed
+                plan: userPlans[doc.id] || "preview",
                 phone: data.phone || "N/A",
                 whatsapp: data.whatsapp || "N/A",
                 address: data.address || "N/A",
@@ -239,6 +247,7 @@ function renderRestaurantsTable(restaurants) {
         tr.innerHTML = `
             <td><strong>${res.businessName}</strong></td>
             <td>${res.ownerName}</td>
+            <td><span class="badge ${res.plan === 'pro' ? 'badge-featured' : ''}">${res.plan}</span></td>
             <td>${res.phone}</td>
             <td>${res.createdAt.toLocaleDateString()}</td>
             <td>${res.menuCount}</td>
@@ -299,12 +308,13 @@ function exportRestaurantsCSV() {
     if (restaurantsData.length === 0) return;
 
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Business Name,Owner Name,Phone,WhatsApp,Address,Menu URL,Date Created\n";
+    csvContent += "Business Name,Owner Name,Plan,Phone,WhatsApp,Address,Menu URL,Date Created\n";
 
     restaurantsData.forEach(r => {
         const row = [
             `"${r.businessName.replace(/"/g, '""')}"`,
             `"${r.ownerName.replace(/"/g, '""')}"`,
+            r.plan,
             r.phone,
             r.whatsapp,
             `"${r.address.replace(/"/g, '""')}"`,

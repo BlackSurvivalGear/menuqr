@@ -23,9 +23,12 @@ const closeModalBtn = document.querySelector(".close-modal");
 const modalTitle = document.getElementById("modal-title");
 const categorySelect = document.getElementById("item-category");
 const customCategoryGroup = document.getElementById("custom-category-group");
+const upgradeModal = document.getElementById("upgrade-modal");
+const closeUpgradeModalBtn = document.getElementById("close-upgrade-modal");
 
 let currentUserId = null;
 let currentUserPlan = "preview";
+let previousCategory = "";
 
 /**
  * Initializes the Menu Builder
@@ -48,6 +51,12 @@ export function initMenuItems(uid, plan = "preview") {
         closeModalBtn.addEventListener("click", closeModal);
     }
 
+    if (closeUpgradeModalBtn) {
+        closeUpgradeModalBtn.addEventListener("click", () => {
+            upgradeModal.classList.add("hidden");
+        });
+    }
+
     if (menuItemForm) {
         menuItemForm.addEventListener("submit", handleFormSubmit);
     }
@@ -68,12 +77,26 @@ function openModal(item = null) {
     document.getElementById("item-id").value = item ? item.id : "";
     modalTitle.innerText = item ? "Edit Menu Item" : "Add Menu Item";
 
+    // Update category options based on plan
+    if (categorySelect) {
+        Array.from(categorySelect.options).forEach(option => {
+            const isProCategory = ["Sides", "Specials", "custom"].includes(option.value);
+            if (currentUserPlan === "preview" && isProCategory) {
+                if (!option.text.includes("🔒")) {
+                    option.text = option.text + " 🔒";
+                }
+            } else {
+                option.text = option.text.replace(" 🔒", "");
+            }
+        });
+    }
+
     if (item) {
         document.getElementById("item-name").value = item.name || "";
         document.getElementById("item-description").value = item.description || "";
         document.getElementById("item-price").value = item.price || "";
 
-        const standardCategories = ["Breakfast", "Lunch", "Dinner", "Drinks", "Desserts", "Sides", "Specials", "Other"];
+        const standardCategories = ["Main Courses", "Starters", "Drinks", "Desserts", "Sides", "Specials"];
         if (standardCategories.includes(item.category)) {
             categorySelect.value = item.category;
             customCategoryGroup.classList.add("hidden");
@@ -86,11 +109,13 @@ function openModal(item = null) {
         document.getElementById("item-available").checked = item.available !== false;
         document.getElementById("item-featured").checked = !!item.featured;
     } else {
+        categorySelect.value = "Main Courses";
         customCategoryGroup.classList.add("hidden");
         document.getElementById("item-available").checked = true;
         document.getElementById("item-featured").checked = false;
     }
 
+    previousCategory = categorySelect.value;
     menuItemModal.classList.remove("hidden");
 }
 
@@ -106,10 +131,32 @@ function closeModal() {
  * Handles category dropdown changes
  */
 function handleCategoryChange() {
-    if (categorySelect.value === "custom") {
+    const selectedValue = categorySelect.value;
+    const isProCategory = ["Sides", "Specials", "custom"].includes(selectedValue);
+
+    if (currentUserPlan === "preview" && isProCategory) {
+        categorySelect.value = previousCategory;
+        showUpgradeModal();
+        return;
+    }
+
+    previousCategory = selectedValue;
+
+    if (selectedValue === "custom") {
         customCategoryGroup.classList.remove("hidden");
     } else {
         customCategoryGroup.classList.add("hidden");
+    }
+}
+
+/**
+ * Shows the Pro upgrade modal
+ */
+function showUpgradeModal() {
+    if (upgradeModal) {
+        upgradeModal.classList.remove("hidden");
+    } else {
+        alert("Upgrade to Pro to unlock advanced menu categories!");
     }
 }
 
@@ -152,6 +199,13 @@ async function handleFormSubmit(e) {
     // Plan validation
     if (currentUserPlan === "preview") {
         const normalizedCategory = getNormalizedCategory(category);
+        const isProCategory = ["Sides", "Specials", "Other"].includes(category) || categorySelect.value === "custom";
+
+        if (isProCategory) {
+            showUpgradeModal();
+            return;
+        }
+
         if (normalizedCategory) {
             const limits = {
                 "Main Courses": 4,
@@ -174,21 +228,6 @@ async function handleFormSubmit(e) {
                     }
                 });
 
-                // If editing, don't count the item itself
-                let effectiveCount = count;
-                if (itemId) {
-                    const existingItem = querySnapshot.docs.find(doc => doc.id === itemId);
-                    if (existingItem && getNormalizedCategory(existingItem.data().category) === normalizedCategory) {
-                        // Already in this category, count remains same (or technically 1 of the count is us)
-                    } else {
-                        // Moving into this restricted category from another
-                    }
-                }
-
-                // Actually, if we are in the category, we stay. If we are entering it, we check limit.
-                // Simpler: if we are ALREADY in the category, we allow save.
-                // If we are NOT in the category and want to move into it (or it's a new item), we check if count < limit.
-
                 let isAlreadyInThisCategory = false;
                 if (itemId) {
                     const existingItem = querySnapshot.docs.find(doc => doc.id === itemId);
@@ -198,7 +237,8 @@ async function handleFormSubmit(e) {
                 }
 
                 if (!isAlreadyInThisCategory && count >= limit) {
-                    showError(`You've reached the Preview Plan limit for ${normalizedCategory} (${limit}). Upgrade to Pro to unlock unlimited menu items.`);
+                    showError(`You've reached the Preview Plan limit for ${normalizedCategory} (${limit}). Upgrade to Pro to unlock unlimited menu items and advanced restaurant features.`);
+                    showUpgradeModal();
                     return;
                 }
             } catch (error) {
@@ -404,6 +444,12 @@ function getNormalizedCategory(category) {
     }
     if (cat === "dessert" || cat === "desserts") {
         return "Desserts";
+    }
+    if (cat === "side" || cat === "sides") {
+        return "Sides";
+    }
+    if (cat === "special" || cat === "specials") {
+        return "Specials";
     }
 
     return null;
