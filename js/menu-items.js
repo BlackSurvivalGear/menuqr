@@ -80,8 +80,17 @@ function openModal(item = null) {
     // Update category options based on plan
     if (categorySelect) {
         Array.from(categorySelect.options).forEach(option => {
-            const isProCategory = ["Sides", "Specials", "custom"].includes(option.value);
-            if (currentUserPlan === "preview" && isProCategory) {
+            const isProCategory = ["custom"].includes(option.value);
+            const isStandardCategory = ["Sides", "Specials"].includes(option.value);
+
+            let isLocked = false;
+            if (currentUserPlan === "preview" && (isStandardCategory || isProCategory)) {
+                isLocked = true;
+            } else if (currentUserPlan === "standard" && isProCategory) {
+                isLocked = true;
+            }
+
+            if (isLocked) {
                 if (!option.text.includes("🔒")) {
                     option.text = option.text + " 🔒";
                 }
@@ -132,11 +141,22 @@ function closeModal() {
  */
 function handleCategoryChange() {
     const selectedValue = categorySelect.value;
-    const isProCategory = ["Sides", "Specials", "custom"].includes(selectedValue);
+    const isProCategory = ["custom"].includes(selectedValue);
+    const isStandardCategory = ["Sides", "Specials"].includes(selectedValue);
 
-    if (currentUserPlan === "preview" && isProCategory) {
+    let isLocked = false;
+    if (currentUserPlan === "preview" && (isStandardCategory || isProCategory)) {
+        isLocked = true;
+    } else if (currentUserPlan === "standard" && isProCategory) {
+        isLocked = true;
+    }
+
+    if (isLocked) {
         categorySelect.value = previousCategory;
-        showUpgradeModal();
+        const msg = selectedValue === "custom"
+            ? "Upgrade to Pro to unlock custom categories!"
+            : "Upgrade to Standard or Pro to unlock advanced menu categories!";
+        showUpgradeModal(msg);
         return;
     }
 
@@ -152,11 +172,15 @@ function handleCategoryChange() {
 /**
  * Shows the Pro upgrade modal
  */
-function showUpgradeModal() {
+function showUpgradeModal(customMessage) {
     if (upgradeModal) {
+        if (customMessage) {
+            const msgEl = upgradeModal.querySelector('.upgrade-message p');
+            if (msgEl) msgEl.innerText = customMessage;
+        }
         upgradeModal.classList.remove("hidden");
     } else {
-        alert("Upgrade to Pro to unlock advanced menu categories!");
+        alert(customMessage || "Upgrade to Pro to unlock advanced menu categories!");
     }
 }
 
@@ -197,53 +221,72 @@ async function handleFormSubmit(e) {
     };
 
     // Plan validation
-    if (currentUserPlan === "preview") {
+    if (currentUserPlan !== "pro") {
         const normalizedCategory = getNormalizedCategory(category);
-        const isProCategory = ["Sides", "Specials", "Other"].includes(category) || categorySelect.value === "custom";
+        const isStandardCategory = ["Sides", "Specials"].includes(category);
+        const isProCategory = categorySelect.value === "custom" || (!normalizedCategory && !isStandardCategory);
 
-        if (isProCategory) {
-            showUpgradeModal();
+        // Category checks
+        if (currentUserPlan === "preview" && (isStandardCategory || isProCategory)) {
+            showUpgradeModal("Upgrade to Standard or Pro to unlock advanced menu categories!");
+            return;
+        }
+        if (currentUserPlan === "standard" && isProCategory) {
+            showUpgradeModal("Upgrade to Pro to unlock custom categories!");
             return;
         }
 
-        if (normalizedCategory) {
-            const limits = {
-                "Main Courses": 4,
-                "Drinks": 2,
-                "Starters": 2,
-                "Desserts": 2
-            };
-            const limit = limits[normalizedCategory];
+        // Limit checks
+        try {
+            const q = query(
+                collection(db, "menuItems"),
+                where("restaurantId", "==", currentUserId)
+            );
+            const querySnapshot = await getDocs(q);
 
-            try {
-                const q = query(
-                    collection(db, "menuItems"),
-                    where("restaurantId", "==", currentUserId)
-                );
-                const querySnapshot = await getDocs(q);
-                let count = 0;
-                querySnapshot.forEach((doc) => {
-                    if (getNormalizedCategory(doc.data().category) === normalizedCategory) {
-                        count++;
+            const items = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            const totalCount = items.length;
+            const isEdit = !!itemId;
+
+            if (currentUserPlan === "preview") {
+                if (normalizedCategory) {
+                    const limits = {
+                        "Main Courses": 4,
+                        "Drinks": 2,
+                        "Starters": 2,
+                        "Desserts": 2
+                    };
+                    const limit = limits[normalizedCategory];
+                    const categoryCount = items.filter(it => getNormalizedCategory(it.category) === normalizedCategory).length;
+
+                    let isAlreadyInThisCategory = false;
+                    if (isEdit) {
+                        const existingItem = items.find(it => it.id === itemId);
+                        if (existingItem && getNormalizedCategory(existingItem.category) === normalizedCategory) {
+                            isAlreadyInThisCategory = true;
+                        }
                     }
-                });
 
-                let isAlreadyInThisCategory = false;
-                if (itemId) {
-                    const existingItem = querySnapshot.docs.find(doc => doc.id === itemId);
-                    if (existingItem && getNormalizedCategory(existingItem.data().category) === normalizedCategory) {
-                        isAlreadyInThisCategory = true;
+                    if (!isAlreadyInThisCategory && categoryCount >= limit) {
+                        showError(`You've reached the Preview Plan limit for ${normalizedCategory} (${limit}). Upgrade to Standard or Pro for more items.`);
+                        showUpgradeModal("Upgrade to Standard or Pro to unlock more menu items!");
+                        return;
                     }
                 }
+            } else if (currentUserPlan === "standard") {
+                let isAlreadyExisting = false;
+                if (isEdit) {
+                    isAlreadyExisting = items.some(it => it.id === itemId);
+                }
 
-                if (!isAlreadyInThisCategory && count >= limit) {
-                    showError(`You've reached the Preview Plan limit for ${normalizedCategory} (${limit}). Upgrade to Pro to unlock unlimited menu items and advanced restaurant features.`);
-                    showUpgradeModal();
+                if (!isAlreadyExisting && totalCount >= 50) {
+                    showError(`You've reached the Standard Plan limit of 50 menu items. Upgrade to Pro for unlimited items.`);
+                    showUpgradeModal("You've reached your Standard Plan limit of 50 menu items. Upgrade to Pro for unlimited items!");
                     return;
                 }
-            } catch (error) {
-                console.error("Error checking plan limits:", error);
             }
+        } catch (error) {
+            console.error("Error checking plan limits:", error);
         }
     }
 
