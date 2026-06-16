@@ -6,6 +6,10 @@ import firebaseConfig from "./firebase-config.js";
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
 
+// Order State
+let cart = [];
+let currentRestaurantData = null;
+
 // DOM Elements
 const loadingScreen = document.getElementById("loading-screen");
 const menuContainer = document.getElementById("menu-container");
@@ -15,6 +19,7 @@ const menuContent = document.getElementById("menu-content");
 const resName = document.getElementById("res-name");
 const resAddress = document.getElementById("res-address");
 const resWhatsapp = document.getElementById("res-whatsapp");
+const cartPanel = document.getElementById("cart-panel");
 
 const errorTitle = document.getElementById("error-title");
 const errorMessage = document.getElementById("error-message");
@@ -86,6 +91,7 @@ async function fetchMenuItems(uid) {
  * Render restaurant details to the DOM
  */
 function renderRestaurantDetails(data) {
+    currentRestaurantData = data;
     if (resName) resName.textContent = data.businessName || "Restaurant";
     if (resAddress) resAddress.textContent = data.address || "";
 
@@ -182,7 +188,25 @@ function renderMenu(items) {
                 itemPrice.textContent = `£${isNaN(priceValue) ? "0.00" : priceValue.toFixed(2)}`;
 
                 itemEl.appendChild(itemMain);
-                itemEl.appendChild(itemPrice);
+
+                // Order Action Container
+                const actionContainer = document.createElement("div");
+                actionContainer.style.display = "flex";
+                actionContainer.style.flexDirection = "column";
+                actionContainer.style.alignItems = "flex-end";
+                actionContainer.style.gap = "0.5rem";
+
+                actionContainer.appendChild(itemPrice);
+
+                if (item.available !== false) {
+                    const addBtn = document.createElement("button");
+                    addBtn.className = "btn-add-order";
+                    addBtn.textContent = "Add to Order";
+                    addBtn.onclick = () => addToCart(item);
+                    actionContainer.appendChild(addBtn);
+                }
+
+                itemEl.appendChild(actionContainer);
                 section.appendChild(itemEl);
             });
 
@@ -229,3 +253,139 @@ async function init() {
 
 // Start the application
 init();
+
+/**
+ * Add an item to the cart
+ */
+function addToCart(item) {
+    const existingItem = cart.find(i => i.id === item.id);
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({
+            id: item.id,
+            name: item.name,
+            price: parseFloat(item.price) || 0,
+            quantity: 1
+        });
+    }
+    renderCart();
+}
+
+/**
+ * Update the quantity of an item in the cart
+ */
+function updateQuantity(itemId, delta) {
+    const itemIndex = cart.findIndex(i => i.id === itemId);
+    if (itemIndex !== -1) {
+        cart[itemIndex].quantity += delta;
+        if (cart[itemIndex].quantity <= 0) {
+            cart.splice(itemIndex, 1);
+        }
+    }
+    renderCart();
+}
+
+/**
+ * Render the cart panel UI
+ */
+function renderCart() {
+    if (!cartPanel) return;
+
+    if (cart.length === 0) {
+        cartPanel.classList.add("hidden");
+        return;
+    }
+
+    cartPanel.classList.remove("hidden");
+
+    let total = 0;
+    const itemsHtml = cart.map(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        return `
+            <div class="cart-item">
+                <div class="cart-item-info">
+                    <span class="cart-item-name">${item.name}</span>
+                    <span class="cart-item-price">£${item.price.toFixed(2)} each</span>
+                </div>
+                <div class="cart-item-actions">
+                    <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
+                    <span>${item.quantity}</span>
+                    <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    cartPanel.innerHTML = `
+        <div class="cart-header">
+            <h3>Your Order</h3>
+            <button class="btn btn-link btn-small" onclick="clearCart()" style="color: var(--error-color)">Clear All</button>
+        </div>
+        <div class="cart-items">
+            ${itemsHtml}
+        </div>
+        <div class="cart-total">
+            <span>Total:</span>
+            <span>£${total.toFixed(2)}</span>
+        </div>
+        <button class="btn btn-whatsapp-order" onclick="sendWhatsAppOrder()">
+            Order via WhatsApp
+        </button>
+    `;
+}
+
+/**
+ * Clear the entire cart
+ */
+function clearCart() {
+    cart = [];
+    renderCart();
+}
+
+/**
+ * Format and send the order via WhatsApp
+ */
+function sendWhatsAppOrder() {
+    if (!currentRestaurantData || cart.length === 0) return;
+
+    const restaurantName = currentRestaurantData.businessName || "Restaurant";
+    const whatsappNumber = (currentRestaurantData.whatsapp || "").replace(/\D/g, "");
+
+    if (!whatsappNumber) {
+        alert("This restaurant doesn't have a WhatsApp number configured.");
+        return;
+    }
+
+    let total = 0;
+    const itemsList = cart.map(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        return `${item.quantity} × ${item.name} (£${item.price.toFixed(2)})`;
+    }).join("\n");
+
+    const message = `Hello ${restaurantName},
+
+I'd like to place the following order:
+
+${itemsList}
+
+Order Total: £${total.toFixed(2)}
+
+Collection or Delivery:
+Customer Name:
+
+Thank you.`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+    window.open(whatsappUrl, "_blank");
+}
+
+// Expose functions to window for onclick handlers in string templates
+window.addToCart = addToCart;
+window.updateQuantity = updateQuantity;
+window.clearCart = clearCart;
+window.sendWhatsAppOrder = sendWhatsAppOrder;
