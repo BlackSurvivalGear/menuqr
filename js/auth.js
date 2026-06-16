@@ -45,7 +45,7 @@ function setAuthMode(isRegister) {
     isRegisterMode = isRegister;
     if (isRegisterMode) {
         authTitle.innerText = "Create Account";
-        authSubtitle.innerText = "Join ScanMenuQR today!";
+        authSubtitle.innerText = "Join ScanMenu.Africa today!";
         btnText.innerText = "Create Account";
         toggleAuthBtn.innerText = "Sign In";
         const switchTextEl = document.getElementById("switch-text");
