@@ -30,17 +30,13 @@ let currentUserId = null;
 let currentUserPlan = "preview";
 let currentCurrencySymbol = "£";
 let previousCategory = "";
+let listenersAttached = false;
 
 /**
- * Initializes the Menu Builder
- * @param {string} uid
- * @param {string} plan
- * @param {string} currencySymbol
+ * Attaches event listeners once
  */
-export function initMenuItems(uid, plan = "preview", currencySymbol = "£") {
-    currentUserId = uid;
-    currentUserPlan = plan;
-    currentCurrencySymbol = currencySymbol;
+function attachEventListeners() {
+    if (listenersAttached) return;
 
     if (addMenuItemBtn) {
         addMenuItemBtn.addEventListener("click", () => openModal());
@@ -68,6 +64,30 @@ export function initMenuItems(uid, plan = "preview", currencySymbol = "£") {
         categorySelect.addEventListener("change", handleCategoryChange);
     }
 
+    listenersAttached = true;
+}
+
+/**
+ * Initializes the Menu Builder
+ * @param {string} uid
+ * @param {string} plan
+ * @param {string} currencySymbol
+ */
+export function initMenuItems(uid, plan = "preview", currencySymbol = "£") {
+    currentUserId = uid;
+    currentUserPlan = plan;
+    currentCurrencySymbol = currencySymbol;
+
+    attachEventListeners();
+    fetchMenuItems();
+}
+
+/**
+ * Updates the currency symbol and re-renders menu items
+ * @param {string} newSymbol
+ */
+export function updateMenuCurrency(newSymbol) {
+    currentCurrencySymbol = newSymbol;
     fetchMenuItems();
 }
 
@@ -379,6 +399,7 @@ async function fetchMenuItems() {
  * @param {Array} items
  */
 function renderMenuItems(items) {
+    console.log("Rendering Menu With:", currentCurrencySymbol);
     menuItemsList.innerHTML = "";
 
     if (items.length === 0) {
