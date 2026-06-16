@@ -7,12 +7,10 @@ import qrcode from "./qrcode.js";
 
 // DOM Elements
 const generateBtn = document.getElementById("generate-qr-btn");
+const openMenuBtn = document.getElementById("open-menu-btn");
 const downloadBtn = document.getElementById("download-qr-btn");
 const copyLinkBtn = document.getElementById("copy-link-btn");
 const qrPreviewContainer = document.getElementById("qr-preview-container");
-const qrDetails = document.getElementById("qr-details");
-const qrBizNameEl = document.getElementById("qr-biz-name");
-const qrPublicUrlEl = document.getElementById("qr-public-url");
 const qrDownloadActions = document.getElementById("qr-download-actions");
 const qrMessage = document.getElementById("qr-message");
 const qrError = document.getElementById("qr-error");
@@ -38,6 +36,10 @@ export function initQRManager(uid, businessName, logoUrl = "") {
 
     if (generateBtn) {
         generateBtn.addEventListener("click", handleGenerateQR);
+    }
+
+    if (openMenuBtn) {
+        openMenuBtn.addEventListener("click", handleOpenMenu);
     }
 
     if (downloadBtn) {
@@ -120,26 +122,39 @@ function handleGenerateQR() {
         bizNameLabel.style.color = "var(--text-color)";
         qrPreviewContainer.appendChild(bizNameLabel);
 
-        // 4. Menu URL
-        const urlLabel = document.createElement("div");
-        urlLabel.textContent = publicMenuUrl;
-        urlLabel.style.fontSize = "0.875rem";
-        urlLabel.style.color = "var(--text-muted)";
-        urlLabel.style.wordBreak = "break-all";
-        urlLabel.style.textAlign = "center";
-        qrPreviewContainer.appendChild(urlLabel);
+        // 4. Clickable Menu Link
+        const menuLink = document.createElement("a");
+        menuLink.href = publicMenuUrl;
+        menuLink.target = "_blank";
+        menuLink.rel = "noopener";
+        menuLink.textContent = "Open Restaurant Menu";
+        menuLink.style.fontSize = "1rem";
+        menuLink.style.color = "var(--primary-color)";
+        menuLink.style.textDecoration = "none";
+        menuLink.style.fontWeight = "600";
+        menuLink.addEventListener("mouseover", () => menuLink.style.textDecoration = "underline");
+        menuLink.addEventListener("mouseout", () => menuLink.style.textDecoration = "none");
+        qrPreviewContainer.appendChild(menuLink);
 
-        if (qrBizNameEl) qrBizNameEl.textContent = currentBizName;
-        if (qrPublicUrlEl) qrPublicUrlEl.textContent = publicMenuUrl;
-
-        qrDetails.classList.remove("hidden");
+        // 5. Buttons Row
         qrDownloadActions.classList.remove("hidden");
+        qrDownloadActions.style.marginTop = "0.5rem";
+        qrPreviewContainer.appendChild(qrDownloadActions);
 
         console.log("QR Code generated successfully for:", currentBizName);
 
     } catch (error) {
         console.error("QR Generation Error:", error);
         showError("Unable to generate QR code. Please try again.");
+    }
+}
+
+/**
+ * Handle Open Menu
+ */
+function handleOpenMenu() {
+    if (publicMenuUrl) {
+        window.open(publicMenuUrl, '_blank');
     }
 }
 
@@ -161,7 +176,7 @@ function handleDownloadPNG() {
             .replace(/-+/g, '-')
             .replace(/^-|-$/g, '');
 
-        const filename = `scanmenuqr-${sanitizedName || 'menu'}.png`;
+        const filename = `${sanitizedName || 'restaurant'}-qr.png`;
 
         // Create download link
         const link = document.createElement("a");
@@ -183,7 +198,7 @@ async function handleCopyLink() {
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(publicMenuUrl);
-            showMessage("Menu link copied successfully.");
+            showMessage("✓ Menu link copied");
         } else {
             throw new Error("Clipboard unavailable");
         }
