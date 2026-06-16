@@ -884,6 +884,10 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* Reset sticky behavior from global header */
+    position: static;
+    top: auto;
+    background: transparent;
 }
 
 .logo-container {
@@ -910,7 +914,7 @@ header {
     font-size: 2.5rem;
     font-weight: 800;
     color: var(--text-color);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .restaurant-info {
@@ -921,7 +925,7 @@ header {
 .whatsapp-link {
     display: inline-flex;
     align-items: center;
-    margin-top: 1rem;
+    margin-top: 1.25rem;
     color: #25d366;
     text-decoration: none;
     font-weight: 600;
@@ -1064,6 +1068,16 @@ header {
 
 #qr-download-actions:not(.hidden) {
     display: flex;
+}
+
+.public-footer {
+    background-color: #F8FAFC !important;
+    border-top: 1px solid #E5E7EB;
+    color: #6B7280 !important;
+    padding: 4rem 1.5rem !important;
+    text-align: center;
+    margin-top: 4rem;
+    font-size: 0.875rem;
 }
 
 /* Footer */
