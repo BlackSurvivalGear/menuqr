@@ -637,6 +637,7 @@ header {
 .badge-available { background-color: var(--primary-light); color: var(--primary-color); }
 .badge-featured { background-color: var(--secondary-light); color: var(--text-color); border: 1px solid var(--secondary-color); }
 .badge-preview { background-color: #f1f5f9; color: var(--text-muted); }
+.badge-error { background-color: #fee2e2; color: var(--error-color); }
 .badge-unavailable {
     background-color: #fee2e2;
     color: #991b1b;

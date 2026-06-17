@@ -121,6 +121,9 @@ onAuthStateChanged(auth, async (user) => {
                 // Show usage card
                 renderUsageCard(uid, userPlan);
 
+                // Show Verification Status
+                renderVerificationStatus(restData);
+
                 // Initialize QR Code management
                 initQRManager(uid, restData.businessName, restData.logoUrl);
 
@@ -322,6 +325,37 @@ async function renderUsageCard(uid, plan = "preview") {
     } catch (error) {
         console.error("Error rendering usage card:", error);
     }
+}
+
+/**
+ * Renders the Verification Status card
+ * @param {object} restData
+ */
+function renderVerificationStatus(restData) {
+    const section = document.getElementById("verification-status-section");
+    const statusValue = document.getElementById("business-status-value");
+    const statusDesc = document.getElementById("business-status-desc");
+
+    if (!section || !statusValue || !statusDesc) return;
+
+    let statusText = "Pending Verification";
+    let statusDescription = "Your business is visible on the Melanin Map™. An admin will review and verify your listing soon.";
+    let color = "var(--accent-orange)";
+
+    if (restData.status === "location_issue") {
+        statusText = "Needs Attention";
+        statusDescription = "There is an issue with your business location. Please verify your address and update your map location.";
+        color = "var(--error-color)";
+    } else if (restData.verified) {
+        statusText = "Verified";
+        statusDescription = "Your business is verified! A green marker is displayed on the Melanin Map™.";
+        color = "var(--success-color)";
+    }
+
+    statusValue.innerText = statusText;
+    statusValue.style.color = color;
+    statusDesc.innerText = statusDescription;
+    section.classList.remove("hidden");
 }
 
 /**

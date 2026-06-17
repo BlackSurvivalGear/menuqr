@@ -34,6 +34,8 @@ let existingCreatedAt = null;
 let currentLogoUrl = "";
 let existingApproved = false;
 let existingFeatured = false;
+let existingVerified = false;
+let existingStatus = "pending";
 
 const CLOUDINARY_CLOUD_NAME = "dekre5agw";
 const CLOUDINARY_UPLOAD_PRESET = "scanmenu_logos";
@@ -152,6 +154,8 @@ onAuthStateChanged(auth, async (user) => {
             currentLogoUrl = data.logoUrl || "";
             existingApproved = data.approved || false;
             existingFeatured = data.featured || false;
+            existingVerified = data.verified || false;
+            existingStatus = data.status || "pending";
 
             if (isEditMode) {
                 setupEditMode(data);
@@ -396,7 +400,9 @@ restaurantForm.addEventListener("submit", async (e) => {
             currencyCode,
             currencySymbol: selectedCurrency ? selectedCurrency.symbol : "£",
             logoUrl: currentLogoUrl,
-            approved: isEditMode ? existingApproved : false,
+            verified: isEditMode ? existingVerified : false,
+            status: isEditMode ? existingStatus : "pending",
+            approved: isEditMode ? existingApproved : true, // Set to true by default for new so it passes legacy filters if any
             featured: isEditMode ? existingFeatured : false,
             createdAt: isEditMode ? existingCreatedAt : serverTimestamp(),
             updatedAt: serverTimestamp()
