@@ -191,7 +191,7 @@ function renderMarkers(data) {
                             <span class="status-dot"></span> ${statusText}
                         </div>
                         <div class="popup-actions">
-                            <a href="menu.html?id=${biz.id}" class="btn btn-primary btn-small">View Menu</a>
+                            <a href="business.html?id=${biz.id}" class="btn btn-primary btn-small">View Profile</a>
                             <a href="https://www.google.com/maps/dir/?api=1&destination=${biz.latitude},${biz.longitude}" target="_blank" class="btn btn-outline btn-small">Directions</a>
                         </div>
                         <div style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.25rem; align-items:center; font-size:0.8rem;">

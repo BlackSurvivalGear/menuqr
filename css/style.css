@@ -2104,6 +2104,15 @@ tr:hover {
 .status-pending { color: var(--pending-color); }
 .status-error { color: var(--attention-color); }
 
+/* Business Profile Specific Enhancements */
+.verification-badge.status-verified { color: var(--verified-color); }
+.verification-badge.status-pending { color: var(--pending-color); }
+.verification-badge.status-error { color: var(--attention-color); }
+
+.verification-badge.status-verified .status-dot { background-color: var(--verified-color); }
+.verification-badge.status-pending .status-dot { background-color: var(--pending-color); }
+.verification-badge.status-error .status-dot { background-color: var(--attention-color); }
+
 @media (max-width: 768px) {
     .hero-title {
         font-size: 2.25rem;

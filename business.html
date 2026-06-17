@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Profile | MelaninMaps™</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .business-profile {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+        .cover-photo-container {
+            height: 300px;
+            width: 100%;
+            background-color: var(--bg-light);
+            position: relative;
+            overflow: hidden;
+        }
+        .cover-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-header-content {
+            padding: 0 2rem;
+            position: relative;
+            margin-top: -60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .profile-logo-container {
+            width: 120px;
+            height: 120px;
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 0.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 4px solid var(--card-bg);
+        }
+        .profile-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .profile-title-section {
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+        }
+        .profile-name {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .verification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .profile-meta {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+            padding: 0 2rem;
+        }
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            padding: 0 2rem 3rem;
+        }
+        .profile-section {
+            margin-bottom: 2.5rem;
+        }
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+        .about-text {
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+        .contact-info-list {
+            list-style: none;
+        }
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .contact-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        .social-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-light);
+            color: var(--text-color);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+        .social-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+        }
+        .hours-table {
+            width: 100%;
+            font-size: 0.95rem;
+        }
+        .hours-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .hours-row:last-child {
+            border-bottom: none;
+        }
+        .hours-day {
+            font-weight: 600;
+        }
+        .open-status {
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .gallery-item {
+            height: 200px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .gallery-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .gallery-img:hover {
+            transform: scale(1.1);
+        }
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            .cover-photo-container {
+                height: 200px;
+            }
+            .profile-name {
+                font-size: 2rem;
+            }
+            .profile-header-content {
+                padding: 0 1rem;
+            }
+            .profile-grid {
+                padding: 0 1rem 3rem;
+            }
+            .quick-actions {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div id="loading-screen" class="loading-container">
+        <div class="loader" style="border-top-color: var(--primary-color); width: 3rem; height: 3rem;"></div>
+        <p style="margin-top: 1rem;">Loading Profile...</p>
+    </div>
+
+    <div id="profile-content" class="hidden" style="padding: 2rem 1rem;">
+        <div class="business-profile">
+            <!-- Cover Photo -->
+            <div class="cover-photo-container">
+                <img id="cover-photo" src="header.png" alt="Cover Photo" class="cover-photo">
+            </div>
+
+            <!-- Header Info -->
+            <div class="profile-header-content">
+                <div class="profile-logo-container">
+                    <img id="profile-logo" src="favi.png" alt="Logo" class="profile-logo">
+                </div>
+                <div class="profile-title-section">
+                    <h1 id="profile-name" class="profile-name">Business Name</h1>
+                    <div id="verification-status" class="verification-badge">
+                        <span class="status-dot"></span> <span id="status-text">Pending Verification</span>
+                    </div>
+                    <div id="profile-category-cuisine" class="profile-meta">Restaurant • Cuisine</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <a id="view-menu-btn" href="#" class="btn btn-primary">📖 View Menu</a>
+                <a id="directions-btn" href="#" target="_blank" class="btn btn-outline">📍 Directions</a>
+                <a id="call-btn" href="#" class="btn btn-outline">📞 Call</a>
+                <a id="whatsapp-btn" href="#" target="_blank" class="btn btn-outline">💬 WhatsApp</a>
+                <a id="website-btn" href="#" target="_blank" class="btn btn-outline">🌐 Website</a>
+            </div>
+
+            <!-- Profile Body -->
+            <div class="profile-grid">
+                <div class="profile-main">
+                    <!-- About Section -->
+                    <section class="profile-section">
+                        <h3 class="section-title">About</h3>
+                        <p id="about-text" class="about-text">This business hasn't added a description yet.</p>
+                    </section>
+
+                    <!-- Gallery Section -->
+                    <section id="gallery-section" class="profile-section hidden">
+                        <h3 class="section-title">Photo Gallery</h3>
+                        <div id="gallery-grid" class="gallery-grid">
+                            <!-- Photos will be injected here -->
+                        </div>
+                    </section>
+                </div>
+
+                <div class="profile-sidebar">
+                    <!-- Contact Section -->
+                    <section class="profile-section">
+                        <h3 class="section-title">Contact & Location</h3>
+                        <ul class="contact-info-list">
+                            <li class="contact-item">
+                                <span class="contact-icon">📍</span>
+                                <span id="contact-address">Address here</span>
+                            </li>
+                            <li id="contact-phone-item" class="contact-item hidden">
+                                <span class="contact-icon">📞</span>
+                                <span id="contact-phone">Phone here</span>
+                            </li>
+                            <li id="contact-email-item" class="contact-item hidden">
+                                <span class="contact-icon">📧</span>
+                                <span id="contact-email">Email here</span>
+                            </li>
+                            <li id="contact-website-item" class="contact-item hidden">
+                                <span class="contact-icon">🌐</span>
+                                <a id="contact-website" href="#" target="_blank" style="color: var(--primary-color);">Visit Website</a>
+                            </li>
+                        </ul>
+
+                        <div id="social-links" class="social-links">
+                            <!-- Social icons injected here -->
+                        </div>
+                    </section>
+
+                    <!-- Hours Section -->
+                    <section id="hours-section" class="profile-section hidden">
+                        <h3 class="section-title">Opening Hours</h3>
+                        <div id="open-now-status" class="open-status"></div>
+                        <div id="hours-table" class="hours-table">
+                            <!-- Hours injected here -->
+                        </div>
+                    </section>
+
+                    <!-- MelaninMaps Info -->
+                    <section class="profile-section">
+                        <h3 class="section-title">Business Info</h3>
+                        <div style="font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div><strong>Country:</strong> <span id="info-country"></span></div>
+                            <div><strong>City:</strong> <span id="info-city"></span></div>
+                            <div><strong>Category:</strong> <span id="info-category"></span></div>
+                            <div><strong>Cuisine:</strong> <span id="info-cuisine"></span></div>
+                            <div><strong>Status:</strong> <span id="info-status"></span></div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <footer class="public-footer" style="margin-top: 0;">
+                <p>Powered by <a href="index.html" style="color: inherit; font-weight: 600;">ScanMenu.Africa</a></p>
+                <p style="margin-top: 0.5rem;"><a href="melanin-map.html" style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Discover more on MelaninMaps™</a></p>
+            </footer>
+        </div>
+    </div>
+
+    <div id="error-screen" class="empty-state hidden">
+        <h2 id="error-title">Profile Unavailable</h2>
+        <p id="error-message">This business profile could not be found or is currently unavailable.</p>
+        <div style="margin-top: 2rem;">
+            <a href="melanin-map.html" class="btn btn-primary">Back to MelaninMaps</a>
+        </div>
+    </div>
+
+    <script type="module" src="js/business.js"></script>
+</body>
+</html>

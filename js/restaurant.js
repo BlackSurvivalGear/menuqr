@@ -33,10 +33,15 @@ const uploadStatus = document.getElementById("upload-status");
 let isEditMode = false;
 let existingCreatedAt = null;
 let currentLogoUrl = "";
+let currentCoverUrl = "";
+let currentGalleryImages = [];
 let existingApproved = false;
 let existingFeatured = false;
 let existingVerified = false;
 let existingStatus = "pending";
+let existingSubscriptionTier = "free";
+let existingProfileViews = 0;
+let existingMenuViews = 0;
 
 const CLOUDINARY_CLOUD_NAME = "dekre5agw";
 const CLOUDINARY_UPLOAD_PRESET = "scanmenu_logos";
@@ -102,6 +107,32 @@ const countryInput = document.getElementById("country");
 const categoryInput = document.getElementById("category");
 const cuisineInput = document.getElementById("cuisine");
 const websiteInput = document.getElementById("website");
+const emailInput = document.getElementById("email");
+const aboutInput = document.getElementById("about");
+const facebookInput = document.getElementById("facebook");
+const instagramInput = document.getElementById("instagram");
+const tiktokInput = document.getElementById("tiktok");
+const twitterInput = document.getElementById("twitter");
+const youtubeInput = document.getElementById("youtube");
+
+const hoursMonday = document.getElementById("hours-monday");
+const hoursTuesday = document.getElementById("hours-tuesday");
+const hoursWednesday = document.getElementById("hours-wednesday");
+const hoursThursday = document.getElementById("hours-thursday");
+const hoursFriday = document.getElementById("hours-friday");
+const hoursSaturday = document.getElementById("hours-saturday");
+const hoursSunday = document.getElementById("hours-sunday");
+
+const coverInput = document.getElementById("cover-input");
+const uploadCoverBtn = document.getElementById("upload-cover-btn");
+const removeCoverBtn = document.getElementById("remove-cover-btn");
+const coverPreview = document.getElementById("cover-preview");
+const noCoverText = document.getElementById("no-cover-text");
+
+const galleryInput = document.getElementById("gallery-input");
+const uploadGalleryBtn = document.getElementById("upload-gallery-btn");
+const galleryPreviews = document.getElementById("gallery-previews");
+
 const currencyInput = document.getElementById("currency-input");
 const currencyList = document.getElementById("currency-list");
 const currencyHidden = document.getElementById("currency");
@@ -206,7 +237,39 @@ async function setupEditMode(data) {
         countryInput.value = data.country || "";
         categoryInput.value = data.category || "";
         cuisineInput.value = data.cuisine || "";
+        emailInput.value = data.email || "";
         websiteInput.value = data.website || "";
+        aboutInput.value = data.about || "";
+
+        facebookInput.value = data.facebook || "";
+        instagramInput.value = data.instagram || "";
+        tiktokInput.value = data.tiktok || "";
+        twitterInput.value = data.twitter || "";
+        youtubeInput.value = data.youtube || "";
+
+        if (data.openingHours) {
+            hoursMonday.value = data.openingHours.monday || "";
+            hoursTuesday.value = data.openingHours.tuesday || "";
+            hoursWednesday.value = data.openingHours.wednesday || "";
+            hoursThursday.value = data.openingHours.thursday || "";
+            hoursFriday.value = data.openingHours.friday || "";
+            hoursSaturday.value = data.openingHours.saturday || "";
+            hoursSunday.value = data.openingHours.sunday || "";
+        }
+
+        if (data.coverImageUrl) {
+            currentCoverUrl = data.coverImageUrl;
+            showCoverPreview(currentCoverUrl);
+        }
+
+        if (data.galleryImages) {
+            currentGalleryImages = data.galleryImages;
+            renderGalleryPreviews();
+        }
+
+        existingSubscriptionTier = data.subscriptionTier || "free";
+        existingProfileViews = data.profileViews || 0;
+        existingMenuViews = data.menuViews || 0;
 
         const currencyCode = data.currencyCode || "GBP";
         const curr = SUPPORTED_CURRENCIES.find(c => c.code === currencyCode);
@@ -251,6 +314,41 @@ function hideLogoPreview() {
     removeLogoBtn.classList.add("hidden");
 }
 
+function showCoverPreview(url) {
+    coverPreview.src = url;
+    coverPreview.classList.remove("hidden");
+    noCoverText.classList.add("hidden");
+    removeCoverBtn.classList.remove("hidden");
+}
+
+function hideCoverPreview() {
+    coverPreview.src = "";
+    coverPreview.classList.add("hidden");
+    noCoverText.classList.remove("hidden");
+    removeCoverBtn.classList.add("hidden");
+}
+
+function renderGalleryPreviews() {
+    galleryPreviews.innerHTML = "";
+    currentGalleryImages.forEach((url, index) => {
+        const div = document.createElement("div");
+        div.style.position = "relative";
+        div.innerHTML = `
+            <img src="${url}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
+            <button type="button" class="remove-gallery-img" data-index="${index}" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px;">×</button>
+        `;
+        galleryPreviews.appendChild(div);
+    });
+
+    document.querySelectorAll(".remove-gallery-img").forEach(btn => {
+        btn.onclick = (e) => {
+            const idx = parseInt(e.target.getAttribute("data-index"));
+            currentGalleryImages.splice(idx, 1);
+            renderGalleryPreviews();
+        };
+    });
+}
+
 uploadLogoBtn.addEventListener("click", () => logoInput.click());
 replaceLogoBtn.addEventListener("click", () => logoInput.click());
 
@@ -258,21 +356,24 @@ removeLogoBtn.addEventListener("click", async () => {
     if (confirm("Are you sure you want to remove the logo?")) {
         currentLogoUrl = "";
         hideLogoPreview();
-        showSuccess("Logo removed successfully. Save profile to apply changes.");
-
-        // Optionally update Firestore immediately if we're in edit mode
-        if (auth.currentUser) {
-            const docRef = doc(db, "businesses", auth.currentUser.uid);
-            await updateDoc(docRef, {
-                logoUrl: "",
-                updatedAt: serverTimestamp()
-            });
-        }
     }
 });
 
-logoInput.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
+uploadCoverBtn.addEventListener("click", () => coverInput.click());
+removeCoverBtn.addEventListener("click", () => {
+    currentCoverUrl = "";
+    hideCoverPreview();
+});
+
+uploadGalleryBtn.addEventListener("click", () => galleryInput.click());
+
+logoInput.addEventListener("change", (e) => handleImageUpload(e.target.files[0], 'logo'));
+coverInput.addEventListener("change", (e) => handleImageUpload(e.target.files[0], 'cover'));
+galleryInput.addEventListener("change", (e) => {
+    Array.from(e.target.files).forEach(file => handleImageUpload(file, 'gallery'));
+});
+
+async function handleImageUpload(file, type) {
     if (!file) return;
 
     // Validation
@@ -288,19 +389,13 @@ logoInput.addEventListener("change", async (e) => {
         return;
     }
 
-    uploadFile(file);
-    // Reset input so the same file can be selected again
-    e.target.value = "";
-});
-
-async function uploadFile(file) {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
     progressContainer.classList.remove("hidden");
     uploadStatus.classList.remove("hidden");
-    uploadStatus.innerText = "Uploading logo...";
+    uploadStatus.innerText = `Uploading ${type}...`;
     progressBar.style.width = "0%";
 
     const xhr = new XMLHttpRequest();
@@ -316,25 +411,28 @@ async function uploadFile(file) {
     xhr.onload = async () => {
         if (xhr.status === 200) {
             const response = JSON.parse(xhr.responseText);
-            currentLogoUrl = response.secure_url;
-            showLogoPreview(currentLogoUrl);
-            showSuccess("Logo uploaded successfully! Save profile to apply changes.");
+            const url = response.secure_url;
 
+            if (type === 'logo') {
+                currentLogoUrl = url;
+                showLogoPreview(url);
+            } else if (type === 'cover') {
+                currentCoverUrl = url;
+                showCoverPreview(url);
+            } else if (type === 'gallery') {
+                currentGalleryImages.push(url);
+                renderGalleryPreviews();
+            }
+
+            showSuccess(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded successfully!`);
             progressContainer.classList.add("hidden");
             uploadStatus.innerText = "Upload complete!";
             setTimeout(() => uploadStatus.classList.add("hidden"), 3000);
         } else {
-            console.error("Cloudinary Error:", xhr.responseText);
             showError("Upload failed. Please try again.");
             progressContainer.classList.add("hidden");
             uploadStatus.classList.add("hidden");
         }
-    };
-
-    xhr.onerror = () => {
-        showError("Upload failed. Please check your connection.");
-        progressContainer.classList.add("hidden");
-        uploadStatus.classList.add("hidden");
     };
 
     xhr.send(formData);
@@ -359,7 +457,25 @@ restaurantForm.addEventListener("submit", async (e) => {
     const country = countryInput.value;
     const category = categoryInput.value;
     const cuisine = cuisineInput.value.trim();
+    const email = emailInput.value.trim();
     const website = websiteInput.value.trim();
+    const about = aboutInput.value.trim();
+    const facebook = facebookInput.value.trim();
+    const instagram = instagramInput.value.trim();
+    const tiktok = tiktokInput.value.trim();
+    const twitter = twitterInput.value.trim();
+    const youtube = youtubeInput.value.trim();
+
+    const openingHours = {
+        monday: hoursMonday.value.trim(),
+        tuesday: hoursTuesday.value.trim(),
+        wednesday: hoursWednesday.value.trim(),
+        thursday: hoursThursday.value.trim(),
+        friday: hoursFriday.value.trim(),
+        saturday: hoursSaturday.value.trim(),
+        sunday: hoursSunday.value.trim()
+    };
+
     const currencyCode = currencyHidden ? currencyHidden.value : "";
 
     // Basic Validation
@@ -409,16 +525,29 @@ restaurantForm.addEventListener("submit", async (e) => {
             country,
             category,
             cuisine,
+            email,
             website,
+            about,
+            facebook,
+            instagram,
+            tiktok,
+            twitter,
+            youtube,
+            openingHours,
             latitude: coords.lat,
             longitude: coords.lon,
             currencyCode,
             currencySymbol: selectedCurrency ? selectedCurrency.symbol : "£",
             logoUrl: currentLogoUrl,
+            coverImageUrl: currentCoverUrl,
+            galleryImages: currentGalleryImages,
             verified: isEditMode ? existingVerified : false,
             status: isEditMode ? existingStatus : "pending",
-            approved: isEditMode ? existingApproved : true, // Set to true by default for new so it passes legacy filters if any
+            approved: isEditMode ? existingApproved : true,
             featured: isEditMode ? existingFeatured : false,
+            subscriptionTier: isEditMode ? existingSubscriptionTier : "free",
+            profileViews: isEditMode ? existingProfileViews : 0,
+            menuViews: isEditMode ? existingMenuViews : 0,
             createdAt: isEditMode ? existingCreatedAt : serverTimestamp(),
             updatedAt: serverTimestamp()
         };
