@@ -68,6 +68,9 @@ async function init() {
     // Load Businesses
     loadBusinesses();
 
+    // Load Diagnostics
+    loadDiagnostics();
+
     // Event Listeners for Search
     document.getElementById('user-search').addEventListener('input', debounce(() => {
         usersPage = 1;
@@ -520,7 +523,7 @@ function renderBusinessesTable(businesses) {
     document.querySelectorAll('.view-details').forEach(btn => {
         btn.addEventListener('click', () => {
             const uid = btn.getAttribute('data-uid');
-            const res = restaurants.find(r => r.uid === uid);
+            const res = businesses.find(r => r.uid === uid);
             alert(`
                 Business: ${res.businessName}
                 Owner: ${res.ownerName}
@@ -529,6 +532,126 @@ function renderBusinessesTable(businesses) {
                 WhatsApp: ${res.whatsapp}
                 UID: ${res.uid}
             `);
+        });
+    });
+}
+
+/**
+ * Load Diagnostics Panel
+ */
+async function loadDiagnostics() {
+    const tableBody = document.getElementById('diagnostic-table-body');
+    if (!tableBody) return;
+    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Loading diagnostics...</td></tr>';
+
+    try {
+        const q = query(collection(db, "businesses"), orderBy("businessName", "asc"));
+        const querySnapshot = await getDocs(q);
+
+        let diagnosticData = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            let mapStatus = "Visible";
+            if (!data.approved) {
+                mapStatus = "Awaiting Approval";
+            } else if (data.latitude === null || data.longitude === null || isNaN(data.latitude) || isNaN(data.longitude)) {
+                mapStatus = "Missing Coordinates";
+            }
+
+            diagnosticData.push({
+                uid: doc.id,
+                businessName: data.businessName || "N/A",
+                approved: data.approved || false,
+                latitude: data.latitude,
+                longitude: data.longitude,
+                mapStatus: mapStatus,
+                address: data.address,
+                city: data.city,
+                country: data.country
+            });
+        });
+
+        renderDiagnosticTable(diagnosticData);
+    } catch (error) {
+        console.error("Error loading diagnostics:", error);
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error loading diagnostics.</td></tr>';
+    }
+}
+
+function renderDiagnosticTable(data) {
+    const tableBody = document.getElementById('diagnostic-table-body');
+    tableBody.innerHTML = '';
+
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No businesses found.</td></tr>';
+        return;
+    }
+
+    data.forEach(biz => {
+        const tr = document.createElement('tr');
+        let statusBadgeClass = "badge-available"; // Visible
+        if (biz.mapStatus === "Awaiting Approval") statusBadgeClass = "badge-preview";
+        if (biz.mapStatus === "Missing Coordinates") statusBadgeClass = "badge-error";
+
+        tr.innerHTML = `
+            <td><strong>${biz.businessName}</strong></td>
+            <td>${biz.approved ? '✅ Yes' : '❌ No'}</td>
+            <td>${biz.latitude !== null ? biz.latitude : '<span style="color:red;">NULL</span>'}</td>
+            <td>${biz.longitude !== null ? biz.longitude : '<span style="color:red;">NULL</span>'}</td>
+            <td><span class="badge ${statusBadgeClass}">${biz.mapStatus}</span></td>
+            <td>
+                <button class="btn btn-outline btn-small geocode-repair-btn" data-uid="${biz.uid}" title="Repair Coordinates">📍 Geocode</button>
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
+
+    // Add event listeners for repair buttons
+    document.querySelectorAll('.geocode-repair-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const uid = btn.getAttribute('data-uid');
+            const biz = data.find(b => b.uid === uid);
+
+            btn.disabled = true;
+            btn.innerText = "⌛...";
+
+            try {
+                const fullAddress = `${biz.address}, ${biz.city}, ${biz.country}`;
+                console.log("Admin Geocoding address:", fullAddress);
+
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept-Language': 'en',
+                        'User-Agent': 'ScanMenu Africa Melanin Map Admin'
+                    }
+                });
+                const results = await response.json();
+                console.log("Admin Nominatim result:", results);
+
+                if (results && results.length > 0) {
+                    const lat = parseFloat(results[0].lat);
+                    const lon = parseFloat(results[0].lon);
+
+                    await updateDoc(doc(db, "businesses", uid), {
+                        latitude: lat,
+                        longitude: lon,
+                        updatedAt: serverTimestamp()
+                    });
+
+                    console.log("Coordinates saved:", lat, lon);
+                    alert(`Location updated for ${biz.businessName}`);
+                    loadDiagnostics(); // Refresh
+                } else {
+                    alert(`Unable to geocode address: ${fullAddress}`);
+                }
+            } catch (error) {
+                console.error("Geocoding repair error:", error);
+                alert("An error occurred during geocoding.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "📍 Geocode";
+            }
         });
     });
 }
