@@ -8,6 +8,7 @@ import {
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { progressiveGeocode } from "./geocoding.js";
+import { COUNTRIES } from "./countries.js";
 
 const restaurantForm = document.getElementById("restaurant-form");
 const submitBtn = document.getElementById("submit-btn");
@@ -132,6 +133,20 @@ function populateCurrencies() {
 }
 
 populateCurrencies();
+
+// Populate country dropdown
+function populateCountries() {
+    if (!countryInput) return;
+
+    COUNTRIES.forEach(country => {
+        const option = document.createElement("option");
+        option.value = country;
+        option.textContent = country;
+        countryInput.appendChild(option);
+    });
+}
+
+populateCountries();
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
