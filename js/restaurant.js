@@ -325,6 +325,7 @@ async function uploadFile(file) {
  */
 async function geocode(address, city, country) {
     const fullAddress = `${address}, ${city}, ${country}`;
+    console.log("Geocoding address:", fullAddress);
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`;
 
     try {
@@ -335,6 +336,7 @@ async function geocode(address, city, country) {
             }
         });
         const data = await response.json();
+        console.log("Nominatim result:", data);
         if (data && data.length > 0) {
             return {
                 lat: parseFloat(data[0].lat),
@@ -385,6 +387,17 @@ restaurantForm.addEventListener("submit", async (e) => {
         btnText.classList.remove("hidden");
         const coords = await geocode(address, city, country);
 
+        if (!coords) {
+            showError("Unable to determine your location. Please verify your address and try again.");
+            btnText.classList.remove("hidden");
+            btnText.innerText = "Save Profile";
+            btnLoader.classList.add("hidden");
+            submitBtn.disabled = false;
+            return;
+        }
+
+        console.log("Coordinates saved:", coords.lat, coords.lon);
+
         const selectedCurrency = SUPPORTED_CURRENCIES.find(c => c.code === currencyCode);
 
         const businessData = {
@@ -399,8 +412,8 @@ restaurantForm.addEventListener("submit", async (e) => {
             category,
             cuisine,
             website,
-            latitude: coords ? coords.lat : null,
-            longitude: coords ? coords.lon : null,
+            latitude: coords.lat,
+            longitude: coords.lon,
             currencyCode,
             currencySymbol: selectedCurrency ? selectedCurrency.symbol : "£",
             logoUrl: currentLogoUrl,

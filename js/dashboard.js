@@ -7,7 +7,9 @@ import {
     query,
     where,
     getDocs,
-    onSnapshot
+    onSnapshot,
+    updateDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { initMenuItems, updateMenuCurrency } from "./menu-items.js";
 import { initQRManager } from "./qr-manager.js";
@@ -347,5 +349,75 @@ if (cancelUpgradeBtn) {
 if (editProfileBtn) {
     editProfileBtn.addEventListener("click", () => {
         window.location.href = "restaurant.html?edit=true";
+    });
+}
+
+const geocodeBtn = document.getElementById("geocode-business-btn");
+const geocodeError = document.getElementById("geocode-error");
+const geocodeSuccess = document.getElementById("geocode-success");
+
+if (geocodeBtn) {
+    geocodeBtn.addEventListener("click", async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        geocodeBtn.disabled = true;
+        const originalText = geocodeBtn.innerText;
+        geocodeBtn.innerText = "📍 Geocoding...";
+        geocodeError.classList.add("hidden");
+        geocodeSuccess.classList.add("hidden");
+
+        try {
+            const docRef = doc(db, "businesses", user.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const { address, city, country } = data;
+
+                if (!address || !city || !country) {
+                    throw new Error("Business address, city, or country is missing.");
+                }
+
+                const fullAddress = `${address}, ${city}, ${country}`;
+                console.log("Geocoding address:", fullAddress);
+
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Accept-Language': 'en',
+                        'User-Agent': 'ScanMenu Africa Melanin Map'
+                    }
+                });
+                const results = await response.json();
+                console.log("Nominatim result:", results);
+
+                if (results && results.length > 0) {
+                    const lat = parseFloat(results[0].lat);
+                    const lon = parseFloat(results[0].lon);
+
+                    await updateDoc(docRef, {
+                        latitude: lat,
+                        longitude: lon,
+                        updatedAt: serverTimestamp()
+                    });
+
+                    console.log("Coordinates saved:", lat, lon);
+                    geocodeSuccess.innerText = "Location updated successfully! Your business is now correctly placed on the Melanin Map.";
+                    geocodeSuccess.classList.remove("hidden");
+                } else {
+                    throw new Error("Unable to determine your location. Please verify your address in profile settings.");
+                }
+            } else {
+                throw new Error("Business profile not found.");
+            }
+        } catch (error) {
+            console.error("Geocoding error:", error);
+            geocodeError.innerText = error.message || "An error occurred during geocoding.";
+            geocodeError.classList.remove("hidden");
+        } finally {
+            geocodeBtn.disabled = false;
+            geocodeBtn.innerText = originalText;
+        }
     });
 }
