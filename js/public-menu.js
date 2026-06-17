@@ -58,13 +58,21 @@ function showMenu() {
 }
 
 /**
- * Fetch restaurant details from Firestore
+ * Fetch business details from Firestore
  */
-async function fetchRestaurantDetails(uid) {
+async function fetchBusinessDetails(uid) {
     try {
-        const docRef = doc(firestore, "restaurants", uid);
-        const docSnap = await getDoc(docRef);
+        // Try businesses collection first
+        let docRef = doc(firestore, "businesses", uid);
+        let docSnap = await getDoc(docRef);
 
+        if (docSnap.exists()) {
+            return docSnap.data();
+        }
+
+        // Migration fallback
+        docRef = doc(firestore, "restaurants", uid);
+        docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             return docSnap.data();
         }
@@ -267,7 +275,7 @@ async function init() {
     }
 
     try {
-        const restaurantData = await fetchRestaurantDetails(restaurantUid);
+        const restaurantData = await fetchBusinessDetails(restaurantUid);
         if (!restaurantData) {
             showError("Not Found", "This menu is currently unavailable.");
             return;

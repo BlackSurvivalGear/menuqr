@@ -170,17 +170,23 @@ if (logoutBtn) {
 }
 
 /**
- * Checks if a restaurant profile exists for the given UID
+ * Checks if a business profile exists for the given UID
  * @param {string} uid
  * @returns {Promise<boolean>}
  */
-async function checkRestaurantProfileExists(uid) {
+async function checkBusinessProfileExists(uid) {
     try {
-        const docRef = doc(db, "restaurants", uid);
-        const docSnap = await getDoc(docRef);
+        // Check businesses first
+        let docRef = doc(db, "businesses", uid);
+        let docSnap = await getDoc(docRef);
+        if (docSnap.exists()) return true;
+
+        // Fallback for migration
+        docRef = doc(db, "restaurants", uid);
+        docSnap = await getDoc(docRef);
         return docSnap.exists();
     } catch (error) {
-        console.error("Error checking restaurant profile:", error);
+        console.error("Error checking business profile:", error);
         return false;
     }
 }
@@ -204,16 +210,38 @@ async function checkIsAdmin(uid) {
 }
 
 /**
- * Injects Admin Dashboard link into navigation if user is admin
+ * Checks if the current user has moderator privileges
+ * @param {string} uid
+ * @returns {Promise<boolean>}
  */
-function injectAdminLink() {
+async function checkIsModerator(uid) {
+    if (!uid) return false;
+    try {
+        const docRef = doc(db, "moderators", uid);
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists();
+    } catch (error) {
+        console.error("Error checking moderator status:", error);
+        return false;
+    }
+}
+
+/**
+ * Injects Admin/Moderator Dashboard link into navigation if user has privileges
+ */
+async function injectDashboardLink(uid) {
+    const isAdmin = await checkIsAdmin(uid);
+    const isModerator = await checkIsModerator(uid);
+
+    if (!isAdmin && !isModerator) return;
+
     const navContainer = document.querySelector('nav .nav-links') || document.querySelector('nav');
     if (navContainer && !document.getElementById('admin-link')) {
         const adminLink = document.createElement('a');
         adminLink.id = 'admin-link';
         adminLink.href = 'admin.html';
         adminLink.className = 'btn btn-outline';
-        adminLink.innerText = 'Admin Dashboard';
+        adminLink.innerText = isAdmin ? 'Admin Dashboard' : 'Moderator Panel';
 
         // Find logout button to insert before it, or just append
         const logoutBtn = document.getElementById('logout-btn');
@@ -238,15 +266,16 @@ onAuthStateChanged(auth, async (user) => {
     if (user) {
         // User is signed in
         const isAdmin = await checkIsAdmin(user.uid);
-        const profileExists = await checkRestaurantProfileExists(user.uid);
+        const isModerator = await checkIsModerator(user.uid);
+        const profileExists = await checkBusinessProfileExists(user.uid);
 
-        if (isAdmin) {
-            injectAdminLink();
+        if (isAdmin || isModerator) {
+            injectDashboardLink(user.uid);
         }
 
         if (currentPage === "login.html" || currentPage === "index.html") {
-            if (isAdmin && currentPage !== "admin.html") {
-                // Admins can go to dashboard or admin page, but let's default to dashboard if they login
+            if ((isAdmin || isModerator) && currentPage !== "admin.html") {
+                // Admins/Moderators can go to dashboard or admin page, but let's default to dashboard if they login
                 window.location.href = "dashboard.html";
             } else if (profileExists) {
                 window.location.href = "dashboard.html";
@@ -254,17 +283,17 @@ onAuthStateChanged(auth, async (user) => {
                 window.location.href = "restaurant.html";
             }
         } else if (currentPage === "dashboard.html") {
-            if (!profileExists && !isAdmin) {
+            if (!profileExists && !isAdmin && !isModerator) {
                 window.location.href = "restaurant.html";
             }
         } else if (currentPage === "restaurant.html") {
             const urlParams = new URLSearchParams(window.location.search);
             const isEditMode = urlParams.get('edit') === 'true';
-            if (profileExists && !isEditMode && !isAdmin) {
+            if (profileExists && !isEditMode && !isAdmin && !isModerator) {
                 window.location.href = "dashboard.html";
             }
         } else if (currentPage === "admin.html") {
-            if (!isAdmin) {
+            if (!isAdmin && !isModerator) {
                 window.location.href = "dashboard.html";
             }
         }

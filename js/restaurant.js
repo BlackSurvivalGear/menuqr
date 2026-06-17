@@ -31,6 +31,8 @@ const uploadStatus = document.getElementById("upload-status");
 let isEditMode = false;
 let existingCreatedAt = null;
 let currentLogoUrl = "";
+let existingApproved = false;
+let existingFeatured = false;
 
 const CLOUDINARY_CLOUD_NAME = "dekre5agw";
 const CLOUDINARY_UPLOAD_PRESET = "scanmenu_logos";
@@ -91,6 +93,11 @@ const ownerNameInput = document.getElementById("ownerName");
 const phoneInput = document.getElementById("phone");
 const whatsappInput = document.getElementById("whatsapp");
 const addressInput = document.getElementById("address");
+const cityInput = document.getElementById("city");
+const countryInput = document.getElementById("country");
+const categoryInput = document.getElementById("category");
+const cuisineInput = document.getElementById("cuisine");
+const websiteInput = document.getElementById("website");
 const currencyInput = document.getElementById("currency-input");
 const currencyList = document.getElementById("currency-list");
 const currencyHidden = document.getElementById("currency");
@@ -128,14 +135,22 @@ onAuthStateChanged(auth, async (user) => {
         const urlParams = new URLSearchParams(window.location.search);
         isEditMode = urlParams.get('edit') === 'true';
 
-        // Check if profile already exists
-        const docRef = doc(db, "restaurants", user.uid);
-        const docSnap = await getDoc(docRef);
+        // Check if profile already exists in businesses collection
+        const docRef = doc(db, "businesses", user.uid);
+        let docSnap = await getDoc(docRef);
+
+        // For migration: if not in businesses, check restaurants
+        if (!docSnap.exists()) {
+            const oldDocRef = doc(db, "restaurants", user.uid);
+            docSnap = await getDoc(oldDocRef);
+        }
 
         if (docSnap.exists()) {
             const data = docSnap.data();
             existingCreatedAt = data.createdAt;
             currentLogoUrl = data.logoUrl || "";
+            existingApproved = data.approved || false;
+            existingFeatured = data.featured || false;
 
             if (isEditMode) {
                 setupEditMode(data);
@@ -146,7 +161,7 @@ onAuthStateChanged(auth, async (user) => {
         } else if (isEditMode) {
             // If edit mode requested but no profile exists, treat as new setup
             isEditMode = false;
-            pageTitle.innerText = "Restaurant Profile Setup";
+            pageTitle.innerText = "Business Profile Setup";
         }
     } else {
         window.location.href = "login.html";
@@ -154,7 +169,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 async function setupEditMode(data) {
-    pageTitle.innerText = "Edit Restaurant Profile";
+    pageTitle.innerText = "Edit Business Profile";
     cancelBtn.classList.remove("hidden");
 
     if (data.logoUrl) {
@@ -167,6 +182,11 @@ async function setupEditMode(data) {
         phoneInput.value = data.phone || "";
         whatsappInput.value = data.whatsapp || "";
         addressInput.value = data.address || "";
+        cityInput.value = data.city || "";
+        countryInput.value = data.country || "";
+        categoryInput.value = data.category || "";
+        cuisineInput.value = data.cuisine || "";
+        websiteInput.value = data.website || "";
 
         const currencyCode = data.currencyCode || "GBP";
         const curr = SUPPORTED_CURRENCIES.find(c => c.code === currencyCode);
@@ -175,8 +195,8 @@ async function setupEditMode(data) {
             currencyHidden.value = curr.code;
         }
     } catch (error) {
-        console.error("Error fetching restaurant data:", error);
-        showError("Failed to load restaurant profile.");
+        console.error("Error fetching business data:", error);
+        showError("Failed to load business profile.");
     }
 }
 
@@ -222,7 +242,7 @@ removeLogoBtn.addEventListener("click", async () => {
 
         // Optionally update Firestore immediately if we're in edit mode
         if (auth.currentUser) {
-            const docRef = doc(db, "restaurants", auth.currentUser.uid);
+            const docRef = doc(db, "businesses", auth.currentUser.uid);
             await updateDoc(docRef, {
                 logoUrl: "",
                 updatedAt: serverTimestamp()
@@ -300,6 +320,33 @@ async function uploadFile(file) {
     xhr.send(formData);
 }
 
+/**
+ * Geocode address using Nominatim
+ */
+async function geocode(address, city, country) {
+    const fullAddress = `${address}, ${city}, ${country}`;
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`;
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Accept-Language': 'en',
+                'User-Agent': 'ScanMenu Africa Melanin Map'
+            }
+        });
+        const data = await response.json();
+        if (data && data.length > 0) {
+            return {
+                lat: parseFloat(data[0].lat),
+                lon: parseFloat(data[0].lon)
+            };
+        }
+    } catch (error) {
+        console.error("Geocoding error:", error);
+    }
+    return null;
+}
+
 restaurantForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -308,11 +355,16 @@ restaurantForm.addEventListener("submit", async (e) => {
     const phone = phoneInput.value.trim();
     const whatsapp = whatsappInput.value.trim();
     const address = addressInput.value.trim();
+    const city = cityInput.value.trim();
+    const country = countryInput.value;
+    const category = categoryInput.value;
+    const cuisine = cuisineInput.value.trim();
+    const website = websiteInput.value.trim();
     const currencyCode = currencyHidden ? currencyHidden.value : "";
 
     // Basic Validation
-    if (!businessName || !ownerName || !phone || !whatsapp || !address || !currencyCode) {
-        showError("All fields are required. Please select a valid currency from the list.");
+    if (!businessName || !ownerName || !phone || !whatsapp || !address || !city || !country || !category || !currencyCode) {
+        showError("All required fields are mandatory. Please select a valid currency from the list.");
         return;
     }
 
@@ -328,32 +380,45 @@ restaurantForm.addEventListener("submit", async (e) => {
             return;
         }
 
+        // Geocoding
+        btnText.innerText = "Geocoding address...";
+        btnText.classList.remove("hidden");
+        const coords = await geocode(address, city, country);
+
         const selectedCurrency = SUPPORTED_CURRENCIES.find(c => c.code === currencyCode);
 
-        const restaurantData = {
+        const businessData = {
             ownerUid: auth.currentUser.uid,
             businessName,
             ownerName,
             phone,
             whatsapp,
             address,
+            city,
+            country,
+            category,
+            cuisine,
+            website,
+            latitude: coords ? coords.lat : null,
+            longitude: coords ? coords.lon : null,
             currencyCode,
             currencySymbol: selectedCurrency ? selectedCurrency.symbol : "£",
             logoUrl: currentLogoUrl,
+            approved: isEditMode ? existingApproved : false,
+            featured: isEditMode ? existingFeatured : false,
             createdAt: isEditMode ? existingCreatedAt : serverTimestamp(),
             updatedAt: serverTimestamp()
         };
 
         // Ensure createdAt is never null if we're in edit mode but it was missing
-        if (isEditMode && !restaurantData.createdAt) {
-            restaurantData.createdAt = serverTimestamp();
+        if (isEditMode && !businessData.createdAt) {
+            businessData.createdAt = serverTimestamp();
         }
 
-        const docRef = doc(db, "restaurants", auth.currentUser.uid);
+        const docRef = doc(db, "businesses", auth.currentUser.uid);
 
-        // Use setDoc for both creation and updates to ensure all fields are written
-        // and to comply with the requirement of using the UID as the document ID.
-        await setDoc(docRef, restaurantData);
+        // Use setDoc for both creation and updates
+        await setDoc(docRef, businessData);
 
         showSuccess("Profile saved successfully! Redirecting...");
 
@@ -364,13 +429,14 @@ restaurantForm.addEventListener("submit", async (e) => {
     } catch (error) {
         console.error("Firestore Error:", error);
         if (error.code === 'permission-denied') {
-            showError("Permission denied. You can only manage your own restaurant profile.");
+            showError("Permission denied. You can only manage your own business profile.");
         } else {
             showError("An error occurred while saving. Please try again.");
         }
 
         // Restore UI
         btnText.classList.remove("hidden");
+        btnText.innerText = "Save Profile";
         btnLoader.classList.add("hidden");
         submitBtn.disabled = false;
     }

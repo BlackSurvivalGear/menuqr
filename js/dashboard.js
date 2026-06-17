@@ -67,57 +67,71 @@ onAuthStateChanged(auth, async (user) => {
                 userCreatedAtEl.innerText = "Not found in records";
             }
 
-            // Real-time listener for Restaurant Profile Info
-            const restDocRef = doc(db, "restaurants", user.uid);
-            onSnapshot(restDocRef, (restDoc) => {
-                if (restDoc.exists()) {
-                    const restData = restDoc.data();
-                    console.log("Restaurant Currency:", restData.currencyCode);
-                    console.log("Currency Symbol:", restData.currencySymbol);
-
-                    bizNameEl.innerText = restData.businessName || "N/A";
-                    ownerNameEl.innerText = restData.ownerName || "N/A";
-                    bizPhoneEl.innerText = restData.phone || "N/A";
-                    bizWhatsappEl.innerText = restData.whatsapp || "N/A";
-                    bizAddressEl.innerText = restData.address || "N/A";
-
-                    const currencyCode = restData.currencyCode || "GBP";
-                    const currencySymbol = restData.currencySymbol || "£";
-
-                    if (bizCurrencyEl) {
-                        bizCurrencyEl.innerText = `${currencyCode} (${currencySymbol})`;
-                    }
-
-                    // Update price input symbol in modal
-                    const priceCurrencySymbolEl = document.getElementById("price-currency-symbol");
-                    if (priceCurrencySymbolEl) {
-                        priceCurrencySymbolEl.innerText = currencySymbol;
-                    }
-
-                    // Initialize or update menu items management
-                    if (!menuItemsInitialized) {
-                        initMenuItems(user.uid, userPlan, currencySymbol);
-                        menuItemsInitialized = true;
+            // Real-time listener for Business Profile Info
+            const restDocRef = doc(db, "businesses", user.uid);
+            onSnapshot(restDocRef, async (restDoc) => {
+                if (!restDoc.exists()) {
+                    // Migration fallback
+                    const oldDocRef = doc(db, "restaurants", user.uid);
+                    const oldDocSnap = await getDoc(oldDocRef);
+                    if (oldDocSnap.exists()) {
+                        updateUIDisplay(oldDocSnap.data(), user.uid, userPlan);
                     } else {
-                        updateMenuCurrency(currencySymbol);
+                        showEmptyProfile();
                     }
-
-                    // Show usage card
-                    renderUsageCard(user.uid, userPlan);
-
-                    // Initialize QR Code management
-                    initQRManager(user.uid, restData.businessName, restData.logoUrl);
-
-                    // Initialize Orders management
-                    initOrders(user.uid);
                 } else {
-                    bizNameEl.innerText = "No profile found";
-                    ownerNameEl.innerText = "No profile found";
-                    bizPhoneEl.innerText = "No profile found";
-                    bizWhatsappEl.innerText = "No profile found";
-                    bizAddressEl.innerText = "No profile found";
+                    updateUIDisplay(restDoc.data(), user.uid, userPlan);
                 }
             });
+
+            function updateUIDisplay(restData, uid, userPlan) {
+                console.log("Business Currency:", restData.currencyCode);
+                console.log("Currency Symbol:", restData.currencySymbol);
+
+                bizNameEl.innerText = restData.businessName || "N/A";
+                ownerNameEl.innerText = restData.ownerName || "N/A";
+                bizPhoneEl.innerText = restData.phone || "N/A";
+                bizWhatsappEl.innerText = restData.whatsapp || "N/A";
+                bizAddressEl.innerText = restData.address || "N/A";
+
+                const currencyCode = restData.currencyCode || "GBP";
+                const currencySymbol = restData.currencySymbol || "£";
+
+                if (bizCurrencyEl) {
+                    bizCurrencyEl.innerText = `${currencyCode} (${currencySymbol})`;
+                }
+
+                // Update price input symbol in modal
+                const priceCurrencySymbolEl = document.getElementById("price-currency-symbol");
+                if (priceCurrencySymbolEl) {
+                    priceCurrencySymbolEl.innerText = currencySymbol;
+                }
+
+                // Initialize or update menu items management
+                if (!menuItemsInitialized) {
+                    initMenuItems(uid, userPlan, currencySymbol);
+                    menuItemsInitialized = true;
+                } else {
+                    updateMenuCurrency(currencySymbol);
+                }
+
+                // Show usage card
+                renderUsageCard(uid, userPlan);
+
+                // Initialize QR Code management
+                initQRManager(uid, restData.businessName, restData.logoUrl);
+
+                // Initialize Orders management
+                initOrders(uid);
+            }
+
+            function showEmptyProfile() {
+                bizNameEl.innerText = "No profile found";
+                ownerNameEl.innerText = "No profile found";
+                bizPhoneEl.innerText = "No profile found";
+                bizWhatsappEl.innerText = "No profile found";
+                bizAddressEl.innerText = "No profile found";
+            }
         } catch (error) {
             console.error("Error fetching data:", error);
             userCreatedAtEl.innerText = "Error loading";
