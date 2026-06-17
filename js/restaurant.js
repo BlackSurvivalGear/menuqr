@@ -115,6 +115,24 @@ const tiktokInput = document.getElementById("tiktok");
 const twitterInput = document.getElementById("twitter");
 const youtubeInput = document.getElementById("youtube");
 
+const whatsappOrderNumberInput = document.getElementById("whatsappOrderNumber");
+const orderPhoneNumberInput = document.getElementById("orderPhoneNumber");
+const orderChannelsContainer = document.getElementById("order-channels-container");
+const addChannelBtn = document.getElementById("add-channel-btn");
+
+let orderChannels = [];
+
+const PRECONFIGURED_PLATFORMS = [
+    "Uber Eats",
+    "Deliveroo",
+    "Just Eat",
+    "Glovo",
+    "Bolt Food",
+    "DoorDash",
+    "Talabat",
+    "Chowdeck"
+];
+
 const hoursMonday = document.getElementById("hours-monday");
 const hoursTuesday = document.getElementById("hours-tuesday");
 const hoursWednesday = document.getElementById("hours-wednesday");
@@ -246,6 +264,17 @@ async function setupEditMode(data) {
         tiktokInput.value = data.tiktok || "";
         twitterInput.value = data.twitter || "";
         youtubeInput.value = data.youtube || "";
+
+        // Populate dedicated inputs from orderChannels array if present
+        const whatsappChannel = (data.orderChannels || []).find(c => c.type === 'whatsapp');
+        const phoneChannel = (data.orderChannels || []).find(c => c.type === 'phone');
+
+        whatsappOrderNumberInput.value = whatsappChannel ? whatsappChannel.url.replace('https://wa.me/', '') : "";
+        orderPhoneNumberInput.value = phoneChannel ? phoneChannel.url.replace('tel:', '') : "";
+
+        // Filter out whatsapp and phone from the dynamic channels list
+        orderChannels = (data.orderChannels || []).filter(c => c.type !== 'whatsapp' && c.type !== 'phone');
+        renderOrderChannels();
 
         if (data.openingHours) {
             hoursMonday.value = data.openingHours.monday || "";
@@ -438,6 +467,74 @@ async function handleImageUpload(file, type) {
     xhr.send(formData);
 }
 
+// Order Channels Management
+function renderOrderChannels() {
+    if (!orderChannelsContainer) return;
+    orderChannelsContainer.innerHTML = "";
+
+    orderChannels.forEach((channel, index) => {
+        const div = document.createElement("div");
+        div.className = "order-channel-row";
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "remove-channel-btn";
+        removeBtn.innerHTML = "&times;";
+        removeBtn.onclick = () => {
+            orderChannels.splice(index, 1);
+            renderOrderChannels();
+        };
+
+        const nameGroup = document.createElement("div");
+        nameGroup.className = "form-group";
+        nameGroup.style.margin="0";
+        nameGroup.innerHTML = `<label style="font-size: 0.75rem;">Platform / Service Name</label>`;
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.className = "channel-name";
+        nameInput.setAttribute("list", "platforms-list");
+        nameInput.value = channel.name;
+        nameInput.placeholder = "e.g. Uber Eats";
+        nameInput.required = true;
+        nameInput.oninput = (e) => { orderChannels[index].name = e.target.value; };
+        nameGroup.appendChild(nameInput);
+
+        const urlGroup = document.createElement("div");
+        urlGroup.className = "form-group";
+        urlGroup.style.margin="0";
+        urlGroup.innerHTML = `<label style="font-size: 0.75rem;">Order URL</label>`;
+        const urlInput = document.createElement("input");
+        urlInput.type = "url";
+        urlInput.className = "channel-url";
+        urlInput.value = channel.url;
+        urlInput.placeholder = "https://...";
+        urlInput.required = true;
+        urlInput.oninput = (e) => { orderChannels[index].url = e.target.value; };
+        urlGroup.appendChild(urlInput);
+
+        div.appendChild(removeBtn);
+        div.appendChild(nameGroup);
+        div.appendChild(urlGroup);
+
+        orderChannelsContainer.appendChild(div);
+    });
+
+    // Ensure datalist exists
+    if (!document.getElementById("platforms-list")) {
+        const dl = document.createElement("datalist");
+        dl.id = "platforms-list";
+        dl.innerHTML = PRECONFIGURED_PLATFORMS.map(p => `<option value="${p}">`).join("");
+        document.body.appendChild(dl);
+    }
+}
+
+if (addChannelBtn) {
+    addChannelBtn.onclick = () => {
+        orderChannels.push({ name: "", url: "", type: "custom" });
+        renderOrderChannels();
+    };
+}
+
 /**
  * Geocode address using Nominatim
  */
@@ -465,6 +562,32 @@ restaurantForm.addEventListener("submit", async (e) => {
     const tiktok = tiktokInput.value.trim();
     const twitter = twitterInput.value.trim();
     const youtube = youtubeInput.value.trim();
+
+    const whatsappOrderNumber = whatsappOrderNumberInput.value.trim();
+    const orderPhoneNumber = orderPhoneNumberInput.value.trim();
+
+    // Map channels to include type correctly based on pre-configured list
+    const finalOrderChannels = orderChannels.map(c => ({
+        name: c.name,
+        url: c.url,
+        type: PRECONFIGURED_PLATFORMS.includes(c.name) ? "delivery" : "custom"
+    }));
+
+    if (whatsappOrderNumber) {
+        finalOrderChannels.push({
+            name: "WhatsApp",
+            url: `https://wa.me/${whatsappOrderNumber.replace(/\D/g, '')}`,
+            type: "whatsapp"
+        });
+    }
+
+    if (orderPhoneNumber) {
+        finalOrderChannels.push({
+            name: "Telephone",
+            url: `tel:${orderPhoneNumber}`,
+            type: "phone"
+        });
+    }
 
     const openingHours = {
         monday: hoursMonday.value.trim(),
@@ -533,6 +656,7 @@ restaurantForm.addEventListener("submit", async (e) => {
             tiktok,
             twitter,
             youtube,
+            orderChannels: finalOrderChannels,
             openingHours,
             latitude: coords.lat,
             longitude: coords.lon,

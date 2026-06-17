@@ -18,18 +18,11 @@ const menuContent = document.getElementById("menu-content");
 
 const resName = document.getElementById("res-name");
 const resAddress = document.getElementById("res-address");
-const resWhatsapp = document.getElementById("res-whatsapp");
-const cartPanel = document.getElementById("cart-panel");
-const mobileCartSummary = document.getElementById("mobile-cart-summary");
-const drawerOverlay = document.getElementById("drawer-overlay");
+const orderOptionsContainer = document.getElementById("order-options-container");
 const menuLayout = document.getElementById("menu-layout");
 
 const errorTitle = document.getElementById("error-title");
 const errorMessage = document.getElementById("error-message");
-
-const orderModal = document.getElementById("order-modal");
-const successModal = document.getElementById("success-modal");
-const orderForm = document.getElementById("order-form");
 
 /**
  * Show error screen
@@ -38,9 +31,6 @@ function showError(title, message) {
     console.log("Showing error:", title, message);
     if (loadingScreen) loadingScreen.classList.add("hidden");
     if (menuLayout) menuLayout.classList.add("hidden");
-    if (mobileCartSummary) mobileCartSummary.classList.add("hidden");
-    if (cartPanel) cartPanel.classList.add("hidden");
-    if (drawerOverlay) drawerOverlay.classList.remove("active");
     if (errorScreen) {
         errorScreen.classList.remove("hidden");
         if (errorTitle) errorTitle.textContent = title;
@@ -139,11 +129,7 @@ function renderRestaurantDetails(data) {
     if (resName) resName.textContent = data.businessName || "Restaurant";
     if (resAddress) resAddress.textContent = data.address || "";
 
-    if (data.whatsapp && resWhatsapp) {
-        const whatsappStr = String(data.whatsapp);
-        resWhatsapp.href = `https://wa.me/${whatsappStr.replace(/\D/g, '')}`;
-        resWhatsapp.classList.remove("hidden");
-    }
+    renderOrderChannels(data);
 }
 
 /**
@@ -244,14 +230,6 @@ function renderMenu(items) {
 
                 actionContainer.appendChild(itemPrice);
 
-                if (item.available !== false) {
-                    const addBtn = document.createElement("button");
-                    addBtn.className = "btn-add-order";
-                    addBtn.textContent = "Add to Order";
-                    addBtn.onclick = () => addToCart(item);
-                    actionContainer.appendChild(addBtn);
-                }
-
                 itemEl.appendChild(actionContainer);
                 section.appendChild(itemEl);
             });
@@ -310,296 +288,54 @@ async function init() {
     }
 }
 
-// Start the application
-init();
-
 /**
- * Add an item to the cart
+ * Render Order Channels
  */
-function addToCart(item) {
-    const existingItem = cart.find(i => i.id === item.id);
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            id: item.id,
-            name: item.name,
-            price: parseFloat(item.price) || 0,
-            quantity: 1
-        });
-    }
-    renderCart();
-}
+function renderOrderChannels(data) {
+    if (!orderOptionsContainer) return;
+    orderOptionsContainer.innerHTML = "";
 
-/**
- * Update the quantity of an item in the cart
- */
-function updateQuantity(itemId, delta) {
-    const itemIndex = cart.findIndex(i => i.id === itemId);
-    if (itemIndex !== -1) {
-        cart[itemIndex].quantity += delta;
-        if (cart[itemIndex].quantity <= 0) {
-            cart.splice(itemIndex, 1);
-        }
-    }
-    renderCart();
-}
+    const channels = data.orderChannels || [];
+    let hasOptions = false;
 
-/**
- * Toggle the mobile cart drawer
- */
-function toggleCartDrawer(isOpen) {
-    if (isOpen) {
-        if (cartPanel) cartPanel.classList.add("drawer-open");
-        if (drawerOverlay) drawerOverlay.classList.add("active");
-        document.body.style.overflow = "hidden"; // Prevent scrolling
-    } else {
-        if (cartPanel) cartPanel.classList.remove("drawer-open");
-        if (drawerOverlay) drawerOverlay.classList.remove("active");
-        document.body.style.overflow = ""; // Restore scrolling
-    }
-}
+    // Header for the section
+    const header = document.createElement("h2");
+    header.className = "order-now-title";
+    header.textContent = "Order Now";
 
-/**
- * Render the cart panel UI
- */
-function renderCart() {
-    if (!cartPanel) return;
+    const channelsList = document.createElement("div");
+    channelsList.className = "order-channels-list";
 
-    if (cart.length === 0) {
-        cartPanel.classList.remove("drawer-open");
-        if (mobileCartSummary) mobileCartSummary.classList.add("hidden");
-        if (drawerOverlay) drawerOverlay.classList.remove("active");
-        document.body.style.overflow = "";
+    // Render all channels from the array
+    channels.forEach(channel => {
+        if (channel.url) {
+            hasOptions = true;
+            const btn = document.createElement("a");
+            btn.href = channel.url;
+            btn.target = "_blank";
 
-        // On desktop, keep the panel visible but empty/hidden if desired
-        // For this UI, let's hide it completely if empty
-        cartPanel.classList.add("hidden");
-        return;
-    }
-
-    cartPanel.classList.remove("hidden");
-
-    let total = 0;
-    let itemCount = 0;
-    const currencySymbol = currentRestaurantData.currencySymbol || "£";
-    const itemsHtml = cart.map(item => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        itemCount += item.quantity;
-        return `
-            <div class="cart-item">
-                <div class="cart-item-info">
-                    <span class="cart-item-name">${item.name}</span>
-                    <span class="cart-item-price">${currencySymbol}${item.price.toFixed(2)} each</span>
-                </div>
-                <div class="cart-item-actions">
-                    <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
-                    <span>${item.quantity}</span>
-                    <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
-                </div>
-            </div>
-        `;
-    }).join("");
-
-    // Render Full Cart Panel (Desktop sidebar / Mobile drawer)
-    cartPanel.innerHTML = `
-        <div class="cart-header">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                <button class="close-drawer-btn" style="display: none;" onclick="toggleCartDrawer(false)">&times;</button>
-                <h3 style="margin: 0;">Your Order</h3>
-            </div>
-            <button class="btn btn-link btn-small" onclick="clearCart()" style="color: var(--error-color)">Clear All</button>
-        </div>
-        <div class="cart-items">
-            ${itemsHtml}
-        </div>
-        <div class="cart-total">
-            <span>Total:</span>
-            <span>${currencySymbol}${total.toFixed(2)}</span>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem;">
-            <button class="btn btn-whatsapp-order" onclick="sendWhatsAppOrder()" style="margin-top: 0;">
-                Order via WhatsApp
-            </button>
-            <button class="btn btn-primary btn-full" onclick="toggleOrderModal(true)">
-                Submit Order
-            </button>
-        </div>
-    `;
-
-    // Show close button on mobile drawer
-    if (window.innerWidth < 1024) {
-        const closeBtn = cartPanel.querySelector(".close-drawer-btn");
-        if (closeBtn) closeBtn.style.display = "flex";
-    }
-
-    // Render Mobile Fixed Summary
-    if (mobileCartSummary) {
-        mobileCartSummary.innerHTML = `
-            <div class="cart-summary-info">
-                <div class="cart-summary-count">${itemCount}</div>
-                <span class="cart-summary-label">View Order</span>
-            </div>
-            <div class="cart-summary-total">${currencySymbol}${total.toFixed(2)}</div>
-        `;
-        mobileCartSummary.classList.remove("hidden");
-        mobileCartSummary.onclick = () => toggleCartDrawer(true);
-    }
-}
-
-/**
- * Clear the entire cart
- */
-function clearCart() {
-    cart = [];
-    renderCart();
-}
-
-/**
- * Format and send the order via WhatsApp
- */
-function sendWhatsAppOrder() {
-    if (!currentRestaurantData || cart.length === 0) return;
-
-    const restaurantName = currentRestaurantData.businessName || "Restaurant";
-    const whatsappNumber = (currentRestaurantData.whatsapp || "").replace(/\D/g, "");
-
-    if (!whatsappNumber) {
-        alert("This restaurant doesn't have a WhatsApp number configured.");
-        return;
-    }
-
-    let total = 0;
-    const currencySymbol = currentRestaurantData.currencySymbol || "£";
-    const itemsList = cart.map(item => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        return `${item.quantity} × ${item.name} (${currencySymbol}${item.price.toFixed(2)})`;
-    }).join("\n");
-
-    const message = `Hello ${restaurantName},
-
-I'd like to place the following order:
-
-${itemsList}
-
-Order Total: ${currencySymbol}${total.toFixed(2)}
-
-Collection or Delivery:
-Customer Name:
-
-Thank you.`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-
-    window.open(whatsappUrl, "_blank");
-}
-
-// Initialize drawer overlay click
-if (drawerOverlay) {
-    drawerOverlay.addEventListener("click", () => toggleCartDrawer(false));
-}
-
-// Handle window resize to adjust drawer state
-window.addEventListener("resize", () => {
-    if (window.innerWidth >= 1024) {
-        toggleCartDrawer(false);
-        document.body.style.overflow = "";
-    }
-});
-
-// Expose functions to window for onclick handlers in string templates
-window.addToCart = addToCart;
-window.updateQuantity = updateQuantity;
-window.clearCart = clearCart;
-window.sendWhatsAppOrder = sendWhatsAppOrder;
-window.toggleCartDrawer = toggleCartDrawer;
-window.toggleOrderModal = toggleOrderModal;
-window.toggleSuccessModal = toggleSuccessModal;
-
-/**
- * Toggle Order Submission Modal
- */
-function toggleOrderModal(show) {
-    if (show) {
-        orderModal.classList.remove("hidden");
-    } else {
-        orderModal.classList.add("hidden");
-    }
-}
-
-/**
- * Toggle Success Modal
- */
-function toggleSuccessModal(show) {
-    if (show) {
-        successModal.classList.remove("hidden");
-    } else {
-        successModal.classList.add("hidden");
-    }
-}
-
-// Handle Order Form Submission
-if (orderForm) {
-    orderForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const customerName = document.getElementById("customer-name").value;
-        const customerPhone = document.getElementById("customer-phone").value;
-
-        if (!customerName || !customerPhone) {
-            alert("Please fill in all required fields.");
-            return;
-        }
-
-        const submitBtn = orderForm.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Submitting...";
-
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const restaurantId = urlParams.get("id");
-
-            let total = 0;
-            cart.forEach(item => {
-                total += item.price * item.quantity;
-            });
-
-            const orderData = {
-                restaurantId: restaurantId,
-                restaurantName: currentRestaurantData.businessName || "Restaurant",
-                customerName: customerName,
-                customerPhone: customerPhone,
-                items: cart.map(item => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price
-                })),
-                subtotal: total,
-                currencyCode: currentRestaurantData.currencyCode || "GBP",
-                currencySymbol: currentRestaurantData.currencySymbol || "£",
-                status: "new",
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp()
-            };
-
-            await addDoc(collection(firestore, "orders"), orderData);
-
-            // Success
-            toggleOrderModal(false);
-            toggleSuccessModal(true);
-            clearCart();
-            orderForm.reset();
-
-        } catch (error) {
-            console.error("Error submitting order:", error);
-            alert("There was an error submitting your order. Please try again.");
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalBtnText;
+            if (channel.type === "whatsapp") {
+                btn.className = "btn btn-whatsapp-order";
+                btn.textContent = "Order on WhatsApp";
+            } else if (channel.type === "phone") {
+                btn.className = "btn btn-phone-order";
+                btn.textContent = "Call to Order";
+            } else {
+                btn.className = "btn btn-delivery-channel";
+                btn.textContent = `Order via ${channel.name}`;
+            }
+            channelsList.appendChild(btn);
         }
     });
+
+    if (hasOptions) {
+        orderOptionsContainer.appendChild(header);
+        orderOptionsContainer.appendChild(channelsList);
+        orderOptionsContainer.classList.remove("hidden");
+    } else {
+        orderOptionsContainer.classList.add("hidden");
+    }
 }
+
+// Start the application
+init();
