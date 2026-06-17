@@ -7,6 +7,7 @@ import {
     updateDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { progressiveGeocode } from "./geocoding.js";
 
 const restaurantForm = document.getElementById("restaurant-form");
 const submitBtn = document.getElementById("submit-btn");
@@ -324,29 +325,7 @@ async function uploadFile(file) {
  * Geocode address using Nominatim
  */
 async function geocode(address, city, country) {
-    const fullAddress = `${address}, ${city}, ${country}`;
-    console.log("Geocoding address:", fullAddress);
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`;
-
-    try {
-        const response = await fetch(url, {
-            headers: {
-                'Accept-Language': 'en',
-                'User-Agent': 'ScanMenu Africa Melanin Map'
-            }
-        });
-        const data = await response.json();
-        console.log("Nominatim result:", data);
-        if (data && data.length > 0) {
-            return {
-                lat: parseFloat(data[0].lat),
-                lon: parseFloat(data[0].lon)
-            };
-        }
-    } catch (error) {
-        console.error("Geocoding error:", error);
-    }
-    return null;
+    return await progressiveGeocode(address, city, country, 'ScanMenu Africa Melanin Map');
 }
 
 restaurantForm.addEventListener("submit", async (e) => {

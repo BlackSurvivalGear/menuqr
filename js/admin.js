@@ -17,6 +17,7 @@ import {
     deleteDoc,
     writeBatch
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { progressiveGeocode } from "./geocoding.js";
 
 import { deleteUser } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 
@@ -616,22 +617,11 @@ function renderDiagnosticTable(data) {
             btn.innerText = "⌛...";
 
             try {
-                const fullAddress = `${biz.address}, ${biz.city}, ${biz.country}`;
-                console.log("Admin Geocoding address:", fullAddress);
+                const coords = await progressiveGeocode(biz.address, biz.city, biz.country, 'ScanMenu Africa Melanin Map Admin');
 
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Accept-Language': 'en',
-                        'User-Agent': 'ScanMenu Africa Melanin Map Admin'
-                    }
-                });
-                const results = await response.json();
-                console.log("Admin Nominatim result:", results);
-
-                if (results && results.length > 0) {
-                    const lat = parseFloat(results[0].lat);
-                    const lon = parseFloat(results[0].lon);
+                if (coords) {
+                    const lat = coords.lat;
+                    const lon = coords.lon;
 
                     await updateDoc(doc(db, "businesses", uid), {
                         latitude: lat,
@@ -643,7 +633,7 @@ function renderDiagnosticTable(data) {
                     alert(`Location updated for ${biz.businessName}`);
                     loadDiagnostics(); // Refresh
                 } else {
-                    alert(`Unable to geocode address: ${fullAddress}`);
+                    alert(`Unable to geocode address for ${biz.businessName}`);
                 }
             } catch (error) {
                 console.error("Geocoding repair error:", error);
