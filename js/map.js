@@ -9,8 +9,10 @@ const db = getFirestore(app);
 
 // Map State
 let map;
+let tileLayer;
 let markerCluster;
 let businesses = [];
+let currentTheme = 'dark'; // Default theme
 
 // DOM Elements
 const searchInput = document.getElementById('search-input');
@@ -28,12 +30,33 @@ function initMap() {
     // Default center (Africa context)
     map = L.map('map').setView([0, 20], 3);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+    updateMapTiles();
 
     // Initial fetch
     fetchBusinesses();
+}
+
+/**
+ * Update map tiles based on current theme
+ */
+function updateMapTiles() {
+    if (tileLayer) {
+        map.removeLayer(tileLayer);
+    }
+
+    if (currentTheme === 'dark') {
+        tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        });
+    } else {
+        tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+    }
+
+    tileLayer.addTo(map);
 }
 
 /**
@@ -80,7 +103,34 @@ function renderMarkers(data) {
 
     markerCluster = L.markerClusterGroup();
 
-    // Custom Icons
+    // Custom Icons - Theme Aware
+    const goldIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    const greyIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    const redIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
     const greenIcon = new L.Icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -99,29 +149,34 @@ function renderMarkers(data) {
         shadowSize: [41, 41]
     });
 
-    const redIcon = new L.Icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41]
-    });
-
     data.forEach(biz => {
         if (biz.latitude && biz.longitude) {
-            let icon = orangeIcon; // Default: Pending
+            let icon;
             let statusText = "Pending Verification";
             let statusClass = "status-pending";
 
-            if (biz.status === "location_issue") {
-                icon = redIcon;
-                statusText = "Location Issue";
-                statusClass = "status-error";
-            } else if (biz.verified) {
-                icon = greenIcon;
-                statusText = "Verified";
-                statusClass = "status-verified";
+            if (currentTheme === 'dark') {
+                icon = greyIcon; // Default: Pending (Black/Grey in Dark Mode)
+                if (biz.status === "location_issue") {
+                    icon = redIcon;
+                    statusText = "Location Issue";
+                    statusClass = "status-error";
+                } else if (biz.verified) {
+                    icon = goldIcon;
+                    statusText = "Verified Business";
+                    statusClass = "status-verified";
+                }
+            } else {
+                icon = orangeIcon; // Default: Pending (Orange in Standard Mode)
+                if (biz.status === "location_issue") {
+                    icon = redIcon;
+                    statusText = "Location Issue";
+                    statusClass = "status-error";
+                } else if (biz.verified) {
+                    icon = greenIcon;
+                    statusText = "Verified Business";
+                    statusClass = "status-verified";
+                }
             }
 
             const marker = L.marker([biz.latitude, biz.longitude], { icon: icon });
@@ -209,5 +264,47 @@ function nearMe() {
 applyFiltersBtn.addEventListener('click', applyFilters);
 nearMeBtn.addEventListener('click', nearMe);
 
+/**
+ * Theme Management
+ */
+function initTheme() {
+    const savedTheme = localStorage.getItem("melaninMapsTheme");
+    if (savedTheme) {
+        currentTheme = savedTheme;
+    }
+    applyTheme(currentTheme);
+}
+
+function applyTheme(theme) {
+    currentTheme = theme;
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem("melaninMapsTheme", theme);
+
+    // Update Toggle UI
+    const darkBtn = document.getElementById('theme-dark-btn');
+    const standardBtn = document.getElementById('theme-standard-btn');
+
+    if (darkBtn && standardBtn) {
+        if (theme === 'dark') {
+            darkBtn.classList.add('active');
+            standardBtn.classList.remove('active');
+        } else {
+            standardBtn.classList.add('active');
+            darkBtn.classList.remove('active');
+        }
+    }
+
+    // Update Map if already initialized
+    if (map) {
+        updateMapTiles();
+        renderMarkers(businesses);
+    }
+}
+
+// Theme Toggle Listeners
+document.getElementById('theme-dark-btn')?.addEventListener('click', () => applyTheme('dark'));
+document.getElementById('theme-standard-btn')?.addEventListener('click', () => applyTheme('standard'));
+
 // Initialize
+initTheme();
 initMap();
