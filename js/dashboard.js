@@ -11,6 +11,7 @@ import {
     updateDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { progressiveGeocode } from "./geocoding.js";
 import { initMenuItems, updateMenuCurrency } from "./menu-items.js";
 import { initQRManager } from "./qr-manager.js";
 import { initOrders } from "./orders.js";
@@ -379,22 +380,11 @@ if (geocodeBtn) {
                     throw new Error("Business address, city, or country is missing.");
                 }
 
-                const fullAddress = `${address}, ${city}, ${country}`;
-                console.log("Geocoding address:", fullAddress);
+                const coords = await progressiveGeocode(address, city, country, 'ScanMenu Africa Melanin Map');
 
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Accept-Language': 'en',
-                        'User-Agent': 'ScanMenu Africa Melanin Map'
-                    }
-                });
-                const results = await response.json();
-                console.log("Nominatim result:", results);
-
-                if (results && results.length > 0) {
-                    const lat = parseFloat(results[0].lat);
-                    const lon = parseFloat(results[0].lon);
+                if (coords) {
+                    const lat = coords.lat;
+                    const lon = coords.lon;
 
                     await updateDoc(docRef, {
                         latitude: lat,
