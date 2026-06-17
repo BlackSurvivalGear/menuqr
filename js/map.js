@@ -159,7 +159,7 @@ function renderMarkers(data) {
                 icon = greyIcon; // Default: Pending (Black/Grey in Dark Mode)
                 if (biz.status === "location_issue") {
                     icon = redIcon;
-                    statusText = "Location Issue";
+                    statusText = "Needs Attention";
                     statusClass = "status-error";
                 } else if (biz.verified) {
                     icon = goldIcon;
@@ -278,6 +278,8 @@ function initTheme() {
 function applyTheme(theme) {
     currentTheme = theme;
     document.body.setAttribute('data-theme', theme);
+    // Ensure the body has the melaninmaps-theme class
+    document.body.classList.add('melaninmaps-theme');
     localStorage.setItem("melaninMapsTheme", theme);
 
     // Update Toggle UI

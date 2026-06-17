@@ -1,20 +1,5 @@
 /* Base Styles */
 
-[data-theme="standard"] {
-    --bg-color: #ffffff;
-    --bg-light: #f8fafc;
-    --text-color: #111827;
-    --text-muted: #4b5563;
-    --border-color: #e2e8f0;
-    --card-bg: #ffffff;
-    --input-bg: #ffffff;
-    --input-text: #111827;
-
-    --verified-color: #2aad27; /* Green */
-    --pending-color: #f69730;  /* Orange */
-    --attention-color: #cb2b3e; /* Red */
-}
-
 :root {
     /* Brand Colors */
     --primary-color: #008751;
@@ -25,20 +10,20 @@
     --secondary-light: #fffbeb;
     --accent-gold: #fbbf24;
 
-    /* Theme Variables - Default: Dark Mode */
-    --bg-color: #0f172a;
-    --bg-light: #1e293b;
-    --text-color: #f8fafc;
-    --text-muted: #94a3b8;
-    --border-color: #334155;
-    --card-bg: #1e293b;
-    --input-bg: #0f172a;
-    --input-text: #f8fafc;
+    /* Theme Variables - Default: Light Mode (ScanMenu Core) */
+    --bg-color: #ffffff;
+    --bg-light: #f8fafc;
+    --text-color: #111827;
+    --text-muted: #4b5563;
+    --border-color: #e2e8f0;
+    --card-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-text: #111827;
 
     /* Theme Verification Colors */
-    --verified-color: #fbbf24; /* Yellow/Gold */
-    --pending-color: #475569;  /* Dark Gray/Blackish */
-    --attention-color: #ef4444; /* Red */
+    --verified-color: #2aad27; /* Green */
+    --pending-color: #f69730;  /* Orange */
+    --attention-color: #cb2b3e; /* Red */
 
     /* UI Colors */
     --error-color: #ef4444;
@@ -57,6 +42,87 @@
     --radius: 0.75rem;
     --radius-sm: 0.375rem;
     --container-width: 1100px;
+}
+
+/* MelaninMaps Luxury Dark Theme */
+.melaninmaps-theme {
+    --primary-color: #D4AF37;
+    --primary-hover: #C9A227;
+    --bg-color: #000000;
+    --bg-light: #111111;
+    --text-color: #D4AF37; /* Metallic Gold */
+    --text-muted: #E6D18A; /* Soft Gold */
+    --border-color: #D4AF37;
+    --card-bg: #111111;
+    --input-bg: #111111;
+    --input-text: #D4AF37;
+
+    --verified-color: #D4AF37; /* Gold */
+    --pending-color: #1a1a1a;  /* Dark Grey/Black */
+    --attention-color: #cb2b3e; /* Red */
+
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.melaninmaps-theme header {
+    background-color: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.melaninmaps-theme .btn-primary {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.melaninmaps-theme .btn-primary:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+.melaninmaps-theme .btn-outline {
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.melaninmaps-theme .btn-outline:hover {
+    background-color: var(--bg-light);
+}
+
+.melaninmaps-theme .form-group input,
+.melaninmaps-theme .form-group textarea,
+.melaninmaps-theme .form-group select {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+}
+
+.melaninmaps-theme .filter-bar {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.melaninmaps-theme .public-footer {
+    background-color: var(--bg-color) !important;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-muted) !important;
+}
+
+/* Optional Standard Theme for MelaninMaps */
+.melaninmaps-theme[data-theme="standard"] {
+    --bg-color: #ffffff;
+    --bg-light: #f8fafc;
+    --text-color: #111827;
+    --text-muted: #4b5563;
+    --border-color: #e2e8f0;
+    --card-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-text: #111827;
+
+    --verified-color: #2aad27; /* Green */
+    --pending-color: #f69730;  /* Orange */
+    --attention-color: #cb2b3e; /* Red */
 }
 
 * {
