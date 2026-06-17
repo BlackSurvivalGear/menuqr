@@ -1,7 +1,7 @@
 /**
  * Progressive fallback geocoding using Nominatim
  */
-export async function progressiveGeocode(address, city, country, userAgent = 'ScanMenu Africa Melanin Map') {
+export async function progressiveGeocode(address, city, country, userAgent = 'ScanMenu Africa MelaninMaps') {
     const cleanAddress = address ? address.trim() : "";
     const cleanCity = city ? city.trim() : "";
     const cleanCountry = country ? country.trim() : "";
