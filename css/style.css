@@ -16,7 +16,7 @@
     --text-color: #D4AF37;
     --text-muted: #E6D18A;
     --border-color: #D4AF37;
-    --card-bg: #111111;
+    --card-bg: rgba(17, 17, 17, 0.7);
     --input-bg: #111111;
     --input-text: #D4AF37;
 
@@ -53,7 +53,7 @@
     --text-color: #D4AF37; /* Metallic Gold */
     --text-muted: #E6D18A; /* Soft Gold */
     --border-color: #D4AF37;
-    --card-bg: #111111;
+    --card-bg: rgba(17, 17, 17, 0.7);
     --input-bg: #111111;
     --input-text: #D4AF37;
 
@@ -382,6 +382,8 @@ header {
 
 .step-card {
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 1rem;
     padding: 2rem;
     border: 1px solid var(--border-color);
@@ -448,7 +450,10 @@ header {
 .benefit-card {
     padding: 1.5rem;
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 0.75rem;
+    border: 1px solid rgba(212, 175, 55, 0.3);
     display: flex;
     gap: 1rem;
 }
@@ -475,6 +480,8 @@ header {
     max-width: 600px;
     margin: 0 auto;
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 3rem;
     border-radius: 1.5rem;
     border: 1px solid var(--border-color);
@@ -508,7 +515,9 @@ header {
 }
 
 .auth-card {
-    background: #111111;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 2.5rem;
     border-radius: 0.5rem;
     box-shadow: var(--card-shadow);
@@ -630,6 +639,8 @@ header {
 
 .modal-content {
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 2rem;
     border-radius: 0.5rem;
     width: 90%;
@@ -676,6 +687,8 @@ header {
     border-radius: 0.5rem;
     padding: 1.5rem;
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     display: flex;
     flex-direction: column;
     transition: var(--transition);
@@ -788,7 +801,9 @@ header {
 }
 
 .welcome-card {
-    background: linear-gradient(135deg, #111111, #151515);
+    background: linear-gradient(135deg, rgba(17, 17, 17, 0.8), rgba(21, 21, 21, 0.8));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: var(--text-color);
     padding: 2.5rem;
     border-radius: var(--radius);
@@ -829,6 +844,8 @@ header {
 
 .account-details {
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 2rem;
     border-radius: 0.5rem;
     box-shadow: var(--card-shadow);
@@ -876,10 +893,10 @@ header {
 
 .stat-card-compact {
     flex: 1;
-    background: #151515;
+    background: var(--card-bg);
     padding: 0.75rem;
     border-radius: 0.375rem;
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(212, 175, 55, 0.3);
     transition: var(--transition);
 }
 
@@ -1331,6 +1348,8 @@ footer {
 
 .pricing-card {
     background-color: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 2.5rem;
     border-radius: var(--radius);
     border: 1px solid var(--border-color);
@@ -1348,13 +1367,13 @@ footer {
 .pricing-card.featured {
     border-color: var(--primary-color);
     border-width: 2px;
-    background-color: #151515;
+    background-color: var(--card-bg);
 }
 
 .pricing-card.premium {
     border-color: var(--secondary-color);
     border-width: 2px;
-    background-color: #151515;
+    background-color: var(--card-bg);
 }
 
 .plan-badge {
@@ -1446,15 +1465,17 @@ footer {
 }
 
 .stat-card {
-    background: #151515;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 1.5rem;
     border-radius: 0.5rem;
     box-shadow: var(--card-shadow);
     text-align: center;
     border-top: 4px solid var(--primary-color);
-    border-left: 1px solid #222;
-    border-right: 1px solid #222;
-    border-bottom: 1px solid #222;
+    border-left: 1px solid rgba(212, 175, 55, 0.3);
+    border-right: 1px solid rgba(212, 175, 55, 0.3);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .stat-value {
@@ -1473,12 +1494,14 @@ footer {
 }
 
 .admin-section {
-    background: #111111;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 2rem;
     border-radius: 0.5rem;
     box-shadow: var(--card-shadow);
     margin-bottom: 2rem;
-    border: 1px solid #222;
+    border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 .section-header {
@@ -1617,6 +1640,8 @@ tr:hover {
     width: 100%;
     max-width: 800px;
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
     border-radius: 1rem 1rem 0 0;
     padding: 1.5rem;
@@ -1892,6 +1917,8 @@ tr:hover {
 
 .order-card {
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
     padding: 1.5rem;
@@ -2048,6 +2075,8 @@ tr:hover {
 }
 .filter-bar {
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 1.5rem;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
@@ -2059,6 +2088,8 @@ tr:hover {
 }
 .map-popup .leaflet-popup-content-wrapper {
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: var(--text-color);
     border-radius: var(--radius-sm);
     padding: 0;
@@ -2099,6 +2130,8 @@ tr:hover {
     right: 10px;
     z-index: 1000;
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: var(--text-color);
     border: 2px solid var(--border-color);
     border-radius: 4px;
@@ -2111,6 +2144,8 @@ tr:hover {
 }
 .map-legend {
     background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 1rem;
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow);
