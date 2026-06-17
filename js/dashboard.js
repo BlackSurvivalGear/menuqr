@@ -339,7 +339,7 @@ function renderVerificationStatus(restData) {
     if (!section || !statusValue || !statusDesc) return;
 
     let statusText = "Pending Verification";
-    let statusDescription = "Your business is visible on the Melanin Map™. An admin will review and verify your listing soon.";
+    let statusDescription = "Your business is visible on MelaninMaps™. An admin will review and verify your listing soon.";
     let color = "var(--accent-orange)";
 
     if (restData.status === "location_issue") {
@@ -348,7 +348,7 @@ function renderVerificationStatus(restData) {
         color = "var(--error-color)";
     } else if (restData.verified) {
         statusText = "Verified";
-        statusDescription = "Your business is verified! A green marker is displayed on the Melanin Map™.";
+        statusDescription = "Your business is verified! A green marker is displayed on MelaninMaps™.";
         color = "var(--success-color)";
     }
 
@@ -414,7 +414,7 @@ if (geocodeBtn) {
                     throw new Error("Business address, city, or country is missing.");
                 }
 
-                const coords = await progressiveGeocode(address, city, country, 'ScanMenu Africa Melanin Map');
+                const coords = await progressiveGeocode(address, city, country, 'ScanMenu Africa MelaninMaps');
 
                 if (coords) {
                     const lat = coords.lat;
@@ -427,7 +427,7 @@ if (geocodeBtn) {
                     });
 
                     console.log("Coordinates saved:", lat, lon);
-                    geocodeSuccess.innerText = "Location updated successfully! Your business is now correctly placed on the Melanin Map.";
+                    geocodeSuccess.innerText = "Location updated successfully! Your business is now correctly placed on MelaninMaps.";
                     geocodeSuccess.classList.remove("hidden");
                 } else {
                     throw new Error("Unable to determine your location. Please verify your address in profile settings.");

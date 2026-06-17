@@ -344,7 +344,7 @@ async function uploadFile(file) {
  * Geocode address using Nominatim
  */
 async function geocode(address, city, country) {
-    return await progressiveGeocode(address, city, country, 'ScanMenu Africa Melanin Map');
+    return await progressiveGeocode(address, city, country, 'ScanMenu Africa MelaninMaps');
 }
 
 restaurantForm.addEventListener("submit", async (e) => {

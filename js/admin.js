@@ -674,7 +674,7 @@ function renderDiagnosticTable(data) {
             btn.innerText = "⌛...";
 
             try {
-                const coords = await progressiveGeocode(biz.address, biz.city, biz.country, 'ScanMenu Africa Melanin Map Admin');
+                const coords = await progressiveGeocode(biz.address, biz.city, biz.country, 'ScanMenu Africa MelaninMaps Admin');
 
                 if (coords) {
                     const lat = coords.lat;
