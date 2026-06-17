@@ -37,6 +37,9 @@ const contactWebsite = document.getElementById('contact-website');
 const contactWebsiteItem = document.getElementById('contact-website-item');
 const socialLinksContainer = document.getElementById('social-links');
 
+const orderOptionsSection = document.getElementById('order-options-section');
+const orderChannelsContainer = document.getElementById('order-channels-container');
+
 const hoursSection = document.getElementById('hours-section');
 const openNowStatus = document.getElementById('open-now-status');
 const hoursTable = document.getElementById('hours-table');
@@ -145,6 +148,9 @@ function renderProfile(id, data) {
         contactEmailItem.classList.remove('hidden');
     }
 
+    // Order Channels
+    renderOrderChannels(data);
+
     // Social Media
     renderSocialLinks(data);
 
@@ -172,8 +178,44 @@ function renderProfile(id, data) {
 }
 
 /**
- * Renders Social Media Icons
+ * Renders Order Channels
  */
+function renderOrderChannels(data) {
+    if (!orderChannelsContainer || !orderOptionsSection) return;
+    orderChannelsContainer.innerHTML = '';
+
+    const channels = data.orderChannels || [];
+    let hasOptions = false;
+
+    // Render all channels from the array
+    channels.forEach(channel => {
+        if (channel.url) {
+            hasOptions = true;
+            const a = document.createElement('a');
+            a.href = channel.url;
+            a.target = '_blank';
+
+            if (channel.type === "whatsapp") {
+                a.className = 'btn btn-whatsapp-order';
+                a.textContent = 'Order on WhatsApp';
+            } else if (channel.type === "phone") {
+                a.className = 'btn btn-phone-order';
+                a.textContent = 'Call to Order';
+            } else {
+                a.className = 'btn btn-delivery-channel';
+                a.textContent = `Order via ${channel.name}`;
+            }
+            orderChannelsContainer.appendChild(a);
+        }
+    });
+
+    if (hasOptions) {
+        orderOptionsSection.classList.remove('hidden');
+    } else {
+        orderOptionsSection.classList.add('hidden');
+    }
+}
+
 function renderSocialLinks(data) {
     const platforms = [
         { key: 'facebook', icon: '📘' },

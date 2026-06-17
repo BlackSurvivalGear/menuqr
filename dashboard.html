@@ -21,9 +21,6 @@
             </a>
             <div class="nav-links">
                 <a href="melanin-map.html" class="btn btn-outline btn-small">MelaninMaps</a>
-                <a href="#orders-section" id="nav-orders-link" class="btn btn-outline btn-small">
-                    Orders <span id="new-orders-badge" class="badge badge-error hidden" style="margin-left: 0.5rem; padding: 0.15rem 0.5rem; background-color: var(--error-color); color: #000000;">0</span>
-                </a>
                 <a href="pricing.html" class="btn btn-outline btn-small">Plans & Pricing</a>
                 <button id="logout-btn" class="btn btn-outline btn-small">Logout</button>
             </div>
@@ -106,22 +103,6 @@
                 </div>
             </section>
 
-            <!-- Orders Section -->
-            <section id="orders-section" class="account-details" style="margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-                    <h3 style="margin-bottom: 0;">Order Inbox</h3>
-                    <div class="filter-group" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <button class="btn btn-outline btn-small order-filter-btn active" data-filter="new">New</button>
-                        <button class="btn btn-outline btn-small order-filter-btn" data-filter="accepted">Accepted</button>
-                        <button class="btn btn-outline btn-small order-filter-btn" data-filter="completed">Completed</button>
-                        <button class="btn btn-outline btn-small order-filter-btn" data-filter="cancelled">Cancelled</button>
-                    </div>
-                </div>
-                <div id="orders-list" class="orders-grid">
-                    <!-- Orders will be injected here -->
-                    <p class="text-muted">Loading orders...</p>
-                </div>
-            </section>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
                 <!-- Business Profile -->
