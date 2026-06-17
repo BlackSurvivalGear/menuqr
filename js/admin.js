@@ -467,9 +467,9 @@ function renderBusinessesTable(businesses) {
 
     businesses.forEach(res => {
         const tr = document.createElement('tr');
-        let statusBadge = '<span class="badge badge-preview">Pending</span>';
-        if (res.status === "location_issue") statusBadge = '<span class="badge badge-error">Loc. Issue</span>';
-        else if (res.verified) statusBadge = '<span class="badge badge-available">Verified</span>';
+        let statusBadge = `<span class="badge" style="background-color: var(--pending-color); color: white;">Pending</span>`;
+        if (res.status === "location_issue") statusBadge = `<span class="badge" style="background-color: var(--attention-color); color: white;">Loc. Issue</span>`;
+        else if (res.verified) statusBadge = `<span class="badge" style="background-color: var(--verified-color); color: var(--bg-color);">Verified</span>`;
 
         tr.innerHTML = `
             <td><strong>${res.businessName}</strong><br><small>${res.city}, ${res.country}</small></td>
@@ -647,16 +647,16 @@ function renderDiagnosticTable(data) {
 
     data.forEach(biz => {
         const tr = document.createElement('tr');
-        let statusBadgeClass = "badge-available"; // Visible
-        if (biz.mapStatus === "Pending Verification") statusBadgeClass = "badge-preview";
-        if (biz.mapStatus === "Missing Coordinates" || biz.mapStatus === "Needs Attention") statusBadgeClass = "badge-error";
+        let statusBadgeStyle = "background-color: var(--verified-color); color: var(--bg-color);"; // Visible
+        if (biz.mapStatus === "Pending Verification") statusBadgeStyle = "background-color: var(--pending-color); color: white;";
+        if (biz.mapStatus === "Missing Coordinates" || biz.mapStatus === "Needs Attention") statusBadgeStyle = "background-color: var(--attention-color); color: white;";
 
         tr.innerHTML = `
             <td><strong>${biz.businessName}</strong></td>
             <td>${biz.verified ? '✅ Yes' : '❌ No'}</td>
             <td>${biz.latitude !== null ? biz.latitude : '<span style="color:red;">NULL</span>'}</td>
             <td>${biz.longitude !== null ? biz.longitude : '<span style="color:red;">NULL</span>'}</td>
-            <td><span class="badge ${statusBadgeClass}">${biz.mapStatus}</span></td>
+            <td><span class="badge" style="${statusBadgeStyle}">${biz.mapStatus}</span></td>
             <td>
                 <button class="btn btn-outline btn-small geocode-repair-btn" data-uid="${biz.uid}" title="Repair Coordinates">📍 Geocode</button>
             </td>

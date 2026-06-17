@@ -28,179 +28,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        #map {
-            height: 600px;
-            width: 100%;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            z-index: 1;
-        }
-        .map-container {
-            margin-top: 2rem;
-            position: relative;
-        }
-        .filter-bar {
-            background: white;
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 1.5rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            align-items: flex-end;
-        }
-        .map-popup .leaflet-popup-content-wrapper {
-            border-radius: var(--radius-sm);
-            padding: 0;
-            overflow: hidden;
-        }
-        .map-popup .leaflet-popup-content {
-            margin: 0;
-            width: 250px !important;
-        }
-        .popup-info {
-            padding: 1rem;
-        }
-        .popup-logo {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            background: var(--bg-light);
-        }
-        .popup-title {
-            font-weight: 800;
-            font-size: 1.1rem;
-            margin-bottom: 0.25rem;
-            color: var(--primary-color);
-        }
-        .popup-meta {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 0.75rem;
-        }
-        .popup-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-        .near-me-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background: white;
-            border: 2px solid rgba(0,0,0,0.2);
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .near-me-btn:hover {
-            background: #f4f4f4;
-        }
-        .map-legend {
-            background: white;
-            padding: 1rem;
-            border-radius: var(--radius-sm);
-            box-shadow: var(--shadow);
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            z-index: 1000;
-            font-size: 0.85rem;
-            border: 1px solid var(--border-color);
-        }
-        .legend-title {
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text-color);
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.25rem;
-        }
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-        .dot-verified { background-color: #2aad27; }
-        .dot-pending { background-color: #f69730; }
-        .dot-attention { background-color: #cb2b3e; }
-
-        .tagline {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-            letter-spacing: 0.1em;
-            text-align: center;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .hero-description {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .status-verified .status-dot { background-color: #2aad27; }
-        .status-pending .status-dot { background-color: #f69730; }
-        .status-error .status-dot { background-color: #cb2b3e; }
-        .status-verified { color: #2aad27; }
-        .status-pending { color: #f69730; }
-        .status-error { color: #cb2b3e; }
-
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.25rem;
-            }
-            .tagline {
-                font-size: 1.1rem;
-            }
-            .hero-description {
-                font-size: 1.1rem;
-            }
-            #map {
-                height: 400px;
-            }
-            .map-legend {
-                position: static;
-                margin-top: 1rem;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-            .legend-title {
-                width: 100%;
-            }
-        }
-    </style>
 </head>
 <body class="bg-light">
     <header>
         <nav class="container">
             <a href="index.html" class="logo">
-                <img src="favi.png" alt="ScanMenu.Africa" class="logo-icon">
-                <span>ScanMenu.Africa</span>
+                <img src="favi.png" alt="MelaninMaps™" class="logo-icon">
+                <span>MelaninMaps™</span>
             </a>
             <div class="nav-links">
+                <div class="theme-toggle-container">
+                    <button id="theme-dark-btn" class="theme-btn active">🌙 Dark</button>
+                    <button id="theme-standard-btn" class="theme-btn">☀ Standard</button>
+                </div>
                 <a href="melanin-map.html" class="btn btn-primary btn-small">MelaninMaps</a>
                 <a href="login.html" class="btn btn-outline btn-small">Sign In</a>
             </div>

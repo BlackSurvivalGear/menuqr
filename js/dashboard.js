@@ -340,16 +340,16 @@ function renderVerificationStatus(restData) {
 
     let statusText = "Pending Verification";
     let statusDescription = "Your business is visible on MelaninMaps™. An admin will review and verify your listing soon.";
-    let color = "var(--accent-orange)";
+    let color = "var(--pending-color)";
 
     if (restData.status === "location_issue") {
         statusText = "Needs Attention";
         statusDescription = "There is an issue with your business location. Please verify your address and update your map location.";
-        color = "var(--error-color)";
+        color = "var(--attention-color)";
     } else if (restData.verified) {
         statusText = "Verified";
-        statusDescription = "Your business is verified! A green marker is displayed on MelaninMaps™.";
-        color = "var(--success-color)";
+        statusDescription = "Your business is verified! A marker highlight is displayed on MelaninMaps™.";
+        color = "var(--verified-color)";
     }
 
     statusValue.innerText = statusText;
