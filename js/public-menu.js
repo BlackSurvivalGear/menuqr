@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import firebaseConfig from "./firebase-config.js";
 
 // Initialize Firebase
@@ -23,6 +23,14 @@ const menuLayout = document.getElementById("menu-layout");
 
 const errorTitle = document.getElementById("error-title");
 const errorMessage = document.getElementById("error-message");
+
+// Cart Elements
+const cartSummary = document.getElementById("cart-summary");
+const cartPanel = document.getElementById("cart-panel");
+const cartItemsContainer = document.getElementById("cart-items");
+const cartTotalValue = document.getElementById("cart-total-value");
+const closeCartBtn = document.getElementById("close-cart");
+const whatsappOrderBtn = document.getElementById("whatsapp-order-btn");
 
 /**
  * Show error screen
@@ -223,12 +231,21 @@ function renderMenu(items) {
 
                 // Order Action Container
                 const actionContainer = document.createElement("div");
+                actionContainer.className = "item-action-container";
                 actionContainer.style.display = "flex";
                 actionContainer.style.flexDirection = "column";
                 actionContainer.style.alignItems = "flex-end";
-                actionContainer.style.gap = "0.5rem";
+                actionContainer.style.gap = "0.75rem";
 
                 actionContainer.appendChild(itemPrice);
+
+                if (item.available !== false) {
+                    const addToCartBtn = document.createElement("button");
+                    addToCartBtn.className = "add-to-cart-btn";
+                    addToCartBtn.textContent = "Add to Cart";
+                    addToCartBtn.onclick = () => addToCart(item);
+                    actionContainer.appendChild(addToCartBtn);
+                }
 
                 itemEl.appendChild(actionContainer);
                 section.appendChild(itemEl);
@@ -286,6 +303,157 @@ async function init() {
             loadingScreen.classList.add('hidden');
         }
     }
+}
+
+/**
+ * Cart Logic Implementation
+ */
+
+function addToCart(item) {
+    const existing = cart.find(i => i.id === item.id);
+    if (existing) {
+        existing.quantity += 1;
+    } else {
+        cart.push({
+            id: item.id,
+            name: item.name,
+            price: parseFloat(item.price),
+            quantity: 1
+        });
+    }
+    updateCartUI();
+}
+
+function removeFromCart(itemId) {
+    cart = cart.filter(i => i.id !== itemId);
+    updateCartUI();
+}
+
+function updateQuantity(itemId, delta) {
+    const item = cart.find(i => i.id === itemId);
+    if (item) {
+        item.quantity += delta;
+        if (item.quantity <= 0) {
+            removeFromCart(itemId);
+        } else {
+            updateCartUI();
+        }
+    }
+}
+
+function calculateTotal() {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+}
+
+function updateCartUI() {
+    const total = calculateTotal();
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const currencySymbol = currentRestaurantData?.currencySymbol || "£";
+
+    // Update Summary Button
+    if (cartSummary) {
+        if (count > 0) {
+            cartSummary.classList.remove("hidden");
+            const countEl = cartSummary.querySelector(".cart-count");
+            const totalEl = cartSummary.querySelector(".cart-total");
+            if (countEl) countEl.textContent = count;
+            if (totalEl) totalEl.textContent = `${currencySymbol}${total.toFixed(2)}`;
+        } else {
+            cartSummary.classList.add("hidden");
+            cartPanel.classList.add("hidden");
+        }
+    }
+
+    // Update Cart Panel Items
+    if (cartItemsContainer) {
+        cartItemsContainer.innerHTML = "";
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = '<p class="text-muted" style="text-align: center; padding: 2rem 0;">Your cart is empty.</p>';
+        } else {
+            cart.forEach(item => {
+                const itemEl = document.createElement("div");
+                itemEl.className = "cart-item";
+                itemEl.innerHTML = `
+                    <div class="cart-item-info">
+                        <span class="cart-item-name">${item.name}</span>
+                        <span class="cart-item-price">${currencySymbol}${item.price.toFixed(2)}</span>
+                    </div>
+                    <div class="cart-item-controls">
+                        <button class="qty-btn" onclick="window.updateCartQty('${item.id}', -1)">-</button>
+                        <span class="qty-value">${item.quantity}</span>
+                        <button class="qty-btn" onclick="window.updateCartQty('${item.id}', 1)">+</button>
+                    </div>
+                `;
+                cartItemsContainer.appendChild(itemEl);
+            });
+        }
+    }
+
+    if (cartTotalValue) {
+        cartTotalValue.textContent = `${currencySymbol}${total.toFixed(2)}`;
+    }
+}
+
+// Expose functions to window for testing and interaction
+window.addToCart = addToCart;
+window.updateCartQty = (id, delta) => updateQuantity(id, delta);
+
+/**
+ * WhatsApp Integration
+ */
+
+function generateWhatsAppMessage() {
+    if (!currentRestaurantData) return "";
+
+    const currencySymbol = currentRestaurantData.currencySymbol || "£";
+    const bizName = currentRestaurantData.businessName || "Restaurant";
+
+    let message = `Hello ${bizName},\n\nI would like to place an order:\n\n`;
+
+    cart.forEach(item => {
+        message += `${item.quantity}x ${item.name} (${currencySymbol}${(item.price * item.quantity).toFixed(2)})\n\n`;
+    });
+
+    message += `Total: ${currencySymbol}${calculateTotal().toFixed(2)}\n\n`;
+    message += `Name:\n\nCollection or Delivery:\n\nAddress (if delivery):\n\nThank you.`;
+
+    return encodeURIComponent(message);
+}
+
+function sendWhatsAppOrder() {
+    const channels = currentRestaurantData.orderChannels || [];
+    const whatsappChannel = channels.find(c => c.type === "whatsapp");
+
+    if (!whatsappChannel || !whatsappChannel.url) {
+        alert("This restaurant has not configured a WhatsApp number for orders.");
+        return;
+    }
+
+    // Extract base number link and append message
+    const baseUrl = whatsappChannel.url;
+    const message = generateWhatsAppMessage();
+    const finalUrl = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}text=${message}`;
+
+    window.open(finalUrl, "_blank");
+}
+
+// Event Listeners for Cart
+if (cartSummary) {
+    cartSummary.onclick = () => {
+        cartPanel.classList.toggle("hidden");
+    };
+}
+
+if (closeCartBtn) {
+    closeCartBtn.onclick = () => {
+        cartPanel.classList.add("hidden");
+    };
+}
+
+if (whatsappOrderBtn) {
+    whatsappOrderBtn.onclick = () => {
+        sendWhatsAppOrder();
+    };
 }
 
 /**

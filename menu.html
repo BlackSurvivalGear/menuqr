@@ -15,6 +15,33 @@
     </div>
 
     <div id="menu-layout" class="menu-layout-wrapper hidden">
+        <!-- Floating Cart Summary (Desktop: Bottom Right, Mobile: Sticky Bottom) -->
+        <button id="cart-summary" class="cart-summary-btn hidden">
+            <span class="cart-icon">🛒</span>
+            <span class="cart-count">0</span>
+            <span class="cart-total">£0.00</span>
+        </button>
+
+        <!-- Compact Cart Panel -->
+        <div id="cart-panel" class="cart-panel hidden">
+            <div class="cart-header">
+                <h3>Your Order</h3>
+                <button id="close-cart" class="close-btn">&times;</button>
+            </div>
+            <div id="cart-items" class="cart-items-list">
+                <!-- Cart items will be injected here -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total-row">
+                    <span>Total</span>
+                    <span id="cart-total-value">£0.00</span>
+                </div>
+                <button id="whatsapp-order-btn" class="btn btn-whatsapp-order btn-full">
+                    Order on WhatsApp
+                </button>
+            </div>
+        </div>
+
         <div id="menu-container" class="public-menu">
             <header class="restaurant-header">
                 <h1 id="res-name" class="restaurant-name"></h1>
