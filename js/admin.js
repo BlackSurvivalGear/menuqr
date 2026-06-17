@@ -467,9 +467,9 @@ function renderBusinessesTable(businesses) {
 
     businesses.forEach(res => {
         const tr = document.createElement('tr');
-        let statusBadge = `<span class="badge" style="background-color: var(--pending-color); color: white;">Pending</span>`;
-        if (res.status === "location_issue") statusBadge = `<span class="badge" style="background-color: var(--attention-color); color: white;">Loc. Issue</span>`;
-        else if (res.verified) statusBadge = `<span class="badge" style="background-color: var(--verified-color); color: var(--bg-color);">Verified</span>`;
+        let statusBadge = `<span class="badge" style="background-color: rgba(246, 151, 48, 0.1); color: var(--pending-color);">Pending</span>`;
+        if (res.status === "location_issue") statusBadge = `<span class="badge" style="background-color: rgba(203, 43, 62, 0.1); color: var(--attention-color);">Loc. Issue</span>`;
+        else if (res.verified) statusBadge = `<span class="badge" style="background-color: rgba(212, 175, 55, 0.1); color: var(--verified-color);">Verified</span>`;
 
         tr.innerHTML = `
             <td><strong>${res.businessName}</strong><br><small>${res.city}, ${res.country}</small></td>
@@ -647,9 +647,9 @@ function renderDiagnosticTable(data) {
 
     data.forEach(biz => {
         const tr = document.createElement('tr');
-        let statusBadgeStyle = "background-color: var(--verified-color); color: var(--bg-color);"; // Visible
-        if (biz.mapStatus === "Pending Verification") statusBadgeStyle = "background-color: var(--pending-color); color: white;";
-        if (biz.mapStatus === "Missing Coordinates" || biz.mapStatus === "Needs Attention") statusBadgeStyle = "background-color: var(--attention-color); color: white;";
+        let statusBadgeStyle = "background-color: rgba(212, 175, 55, 0.1); color: var(--verified-color);"; // Visible
+        if (biz.mapStatus === "Pending Verification") statusBadgeStyle = "background-color: rgba(246, 151, 48, 0.1); color: var(--pending-color);";
+        if (biz.mapStatus === "Missing Coordinates" || biz.mapStatus === "Needs Attention") statusBadgeStyle = "background-color: rgba(203, 43, 62, 0.1); color: var(--attention-color);";
 
         tr.innerHTML = `
             <td><strong>${biz.businessName}</strong></td>

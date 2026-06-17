@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu | ScanMenu.Africa</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-light">
+<body>
     <div id="loading-screen" class="loading-container">
         <div class="loader" style="border-top-color: var(--primary-color); width: 3rem; height: 3rem;"></div>
         <p style="margin-top: 1rem;">Loading Menu...</p>
@@ -57,7 +59,7 @@
                     <input type="tel" id="customer-phone" required placeholder="e.g. +447842110899">
                 </div>
                 <div class="form-actions" style="margin-top: 2rem;">
-                    <button type="button" class="btn btn-outline" style="flex: 1;" onclick="toggleOrderModal(false)">Cancel</button>
+                    <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="toggleOrderModal(false)">Cancel</button>
                     <button type="submit" class="btn btn-primary" style="flex: 1;">Submit Order</button>
                 </div>
             </form>
@@ -81,7 +83,7 @@
         <h2 id="error-title">Unavailable</h2>
         <p id="error-message">This menu is currently unavailable.</p>
         <div style="margin-top: 2rem;">
-            <a href="index.html" class="btn btn-outline">Back to Home</a>
+            <a href="index.html" class="btn btn-secondary">Back to Home</a>
         </div>
     </div>
 

@@ -173,7 +173,7 @@ function renderMarkers(data) {
                     statusText = "Location Issue";
                     statusClass = "status-error";
                 } else if (biz.verified) {
-                    icon = greenIcon;
+                    icon = goldIcon;
                     statusText = "Verified Business";
                     statusClass = "status-verified";
                 }
