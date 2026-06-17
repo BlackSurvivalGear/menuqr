@@ -4,18 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Restaurant Profile - ScanMenu.Africa</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-light">
+<body>
     <header>
         <nav class="container">
             <a href="index.html" class="logo">
-                <img src="favi.png" alt="ScanMenu.Africa" class="logo-icon">
+                <img src="logo.png" alt="ScanMenu.Africa" class="logo-icon">
                 <span>ScanMenu.Africa</span>
             </a>
             <div class="nav-links">
-                <a href="melanin-map.html" class="btn btn-outline btn-small">MelaninMaps</a>
-                <button id="logout-btn" class="btn btn-outline btn-small">Logout</button>
+                <a href="melanin-map.html" class="btn btn-secondary btn-small">MelaninMaps</a>
+                <button id="logout-btn" class="btn btn-secondary btn-small">Logout</button>
             </div>
         </nav>
     </header>
@@ -36,9 +38,9 @@
                     <input type="file" id="logo-input" accept="image/png, image/jpeg, image/jpg, image/webp" class="hidden">
 
                     <div class="logo-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
-                        <button type="button" id="upload-logo-btn" class="btn btn-outline btn-small">Upload Logo</button>
-                        <button type="button" id="replace-logo-btn" class="btn btn-outline btn-small hidden">Replace Logo</button>
-                        <button type="button" id="remove-logo-btn" class="btn btn-outline btn-small hidden" style="color: var(--error-color); border-color: var(--error-color);">Remove Logo</button>
+                        <button type="button" id="upload-logo-btn" class="btn btn-secondary btn-small">Upload Logo</button>
+                        <button type="button" id="replace-logo-btn" class="btn btn-secondary btn-small hidden">Replace Logo</button>
+                        <button type="button" id="remove-logo-btn" class="btn btn-secondary btn-small hidden" style="color: var(--error-color); border-color: var(--error-color);">Remove Logo</button>
                     </div>
 
                     <div id="upload-progress-container" class="progress-container hidden">
@@ -149,8 +151,8 @@
                         </div>
                         <input type="file" id="cover-input" accept="image/png, image/jpeg, image/jpg, image/webp" class="hidden">
                         <div class="logo-actions" style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
-                            <button type="button" id="upload-cover-btn" class="btn btn-outline btn-small">Upload Cover</button>
-                            <button type="button" id="remove-cover-btn" class="btn btn-outline btn-small hidden" style="color: var(--error-color); border-color: var(--error-color);">Remove</button>
+                            <button type="button" id="upload-cover-btn" class="btn btn-secondary btn-small">Upload Cover</button>
+                            <button type="button" id="remove-cover-btn" class="btn btn-secondary btn-small hidden" style="color: var(--error-color); border-color: var(--error-color);">Remove</button>
                         </div>
                     </div>
 
@@ -160,7 +162,7 @@
                             <!-- Gallery items here -->
                         </div>
                         <input type="file" id="gallery-input" accept="image/png, image/jpeg, image/jpg, image/webp" class="hidden" multiple>
-                        <button type="button" id="upload-gallery-btn" class="btn btn-outline btn-small">Add Gallery Photos</button>
+                        <button type="button" id="upload-gallery-btn" class="btn btn-secondary btn-small">Add Gallery Photos</button>
                     </div>
 
                     <div class="form-group">
@@ -175,7 +177,7 @@
                         <div id="btn-loader" class="loader hidden"></div>
                     </button>
 
-                    <a href="dashboard.html" id="cancel-btn" class="btn btn-outline btn-full hidden">Cancel</a>
+                    <a href="dashboard.html" id="cancel-btn" class="btn btn-secondary btn-full hidden">Cancel</a>
                 </form>
 
                 <div id="error-message" class="error-box hidden"></div>

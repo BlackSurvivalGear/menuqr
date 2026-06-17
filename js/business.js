@@ -83,7 +83,7 @@ function renderProfile(id, data) {
     // Basic Info
     document.title = `${data.businessName} | MelaninMaps™`;
     profileName.innerText = data.businessName;
-    profileLogo.src = data.logoUrl || 'assets/images/MM Logo.png';
+    profileLogo.src = data.logoUrl || 'logo.png';
     coverPhoto.src = data.coverImageUrl || 'header.png';
     categoryCuisine.innerText = `${data.category} • ${data.cuisine || 'General'}`;
 
@@ -101,7 +101,7 @@ function renderProfile(id, data) {
 
     verificationBadge.className = `verification-badge ${statusClass}`;
     if (data.verified) {
-        statusText.innerHTML = `<img src="assets/images/MM Logo.png" style="height:16px; width:auto; vertical-align:middle; margin-right:4px;"> Verified by MelaninMaps`;
+        statusText.innerHTML = `<img src="logo.png" style="height:16px; width:auto; vertical-align:middle; margin-right:4px;"> Verified by MelaninMaps`;
     } else {
         statusText.innerText = statusLabel;
     }
