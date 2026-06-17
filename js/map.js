@@ -36,11 +36,11 @@ function initMap() {
 }
 
 /**
- * Fetch approved businesses from Firestore
+ * Fetch all businesses from Firestore
  */
 async function fetchBusinesses() {
     try {
-        const q = query(collection(db, "businesses"), where("approved", "==", true));
+        const q = query(collection(db, "businesses"));
         const querySnapshot = await getDocs(q);
 
         businesses = [];
@@ -77,16 +77,61 @@ function renderMarkers(data) {
     markers.forEach(m => map.removeLayer(m));
     markers = [];
 
+    // Custom Icons
+    const greenIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    const orangeIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
+    const redIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
     data.forEach(biz => {
         if (biz.latitude && biz.longitude) {
-            const marker = L.marker([biz.latitude, biz.longitude]).addTo(map);
+            let icon = orangeIcon; // Default: Pending
+            let statusText = "Pending Verification";
+            let statusClass = "status-pending";
+
+            if (biz.status === "location_issue") {
+                icon = redIcon;
+                statusText = "Location Issue";
+                statusClass = "status-error";
+            } else if (biz.verified) {
+                icon = greenIcon;
+                statusText = "Verified";
+                statusClass = "status-verified";
+            }
+
+            const marker = L.marker([biz.latitude, biz.longitude], { icon: icon }).addTo(map);
 
             const popupContent = `
                 <div class="map-popup">
                     ${biz.logoUrl ? `<img src="${biz.logoUrl}" class="popup-logo">` : '<div class="popup-logo" style="display:flex;align-items:center;justify-content:center;color:#ccc;">No Logo</div>'}
                     <div class="popup-info">
                         <div class="popup-title">${biz.businessName}</div>
-                        <div class="popup-meta">${biz.category} • ${biz.city}, ${biz.country}</div>
+                        <div class="popup-meta" style="margin-bottom:0.25rem;">${biz.category} • ${biz.city}, ${biz.country}</div>
+                        <div class="popup-status ${statusClass}" style="font-size:0.75rem; font-weight:700; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.25rem;">
+                            <span class="status-dot"></span> ${statusText}
+                        </div>
                         <div class="popup-actions">
                             <a href="menu.html?id=${biz.id}" class="btn btn-primary btn-small">View Menu</a>
                             <a href="https://www.google.com/maps/dir/?api=1&destination=${biz.latitude},${biz.longitude}" target="_blank" class="btn btn-outline btn-small">Directions</a>

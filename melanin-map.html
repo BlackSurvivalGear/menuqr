@@ -82,9 +82,65 @@
         .near-me-btn:hover {
             background: #f4f4f4;
         }
+        .map-legend {
+            background: white;
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow);
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+        }
+        .legend-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot-verified { background-color: #2aad27; }
+        .dot-pending { background-color: #f69730; }
+        .dot-attention { background-color: #cb2b3e; }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-verified .status-dot { background-color: #2aad27; }
+        .status-pending .status-dot { background-color: #f69730; }
+        .status-error .status-dot { background-color: #cb2b3e; }
+        .status-verified { color: #2aad27; }
+        .status-pending { color: #f69730; }
+        .status-error { color: #cb2b3e; }
+
         @media (max-width: 768px) {
             #map {
                 height: 400px;
+            }
+            .map-legend {
+                position: static;
+                margin-top: 1rem;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            .legend-title {
+                width: 100%;
             }
         }
     </style>
@@ -151,6 +207,21 @@
         <section class="map-container">
             <button id="near-me-btn" class="near-me-btn">📍 Near Me</button>
             <div id="map"></div>
+            <div class="map-legend">
+                <div class="legend-title">Melanin Map™ Legend</div>
+                <div class="legend-item">
+                    <span class="legend-dot dot-verified"></span>
+                    <span>Verified Businesses</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot dot-pending"></span>
+                    <span>Pending Verification</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot dot-attention"></span>
+                    <span>Needs Attention</span>
+                </div>
+            </div>
         </section>
 
         <section style="margin-top: 4rem; text-align: center;">

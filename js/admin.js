@@ -431,6 +431,8 @@ async function loadBusinesses(searchTerm = "") {
                 country: data.country || "N/A",
                 category: data.category || "N/A",
                 approved: data.approved || false,
+                verified: data.verified || false,
+                status: data.status || "pending",
                 featured: data.featured || false,
                 createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
                 menuCount: menuCounts[doc.id] || 0
@@ -465,16 +467,18 @@ function renderBusinessesTable(businesses) {
 
     businesses.forEach(res => {
         const tr = document.createElement('tr');
+        let statusBadge = '<span class="badge badge-preview">Pending</span>';
+        if (res.status === "location_issue") statusBadge = '<span class="badge badge-error">Loc. Issue</span>';
+        else if (res.verified) statusBadge = '<span class="badge badge-available">Verified</span>';
+
         tr.innerHTML = `
             <td><strong>${res.businessName}</strong><br><small>${res.city}, ${res.country}</small></td>
             <td>${res.ownerName}</td>
             <td><span class="badge ${res.plan === 'pro' ? 'badge-featured' : ''}">${res.plan}</span></td>
             <td>${res.category}</td>
             <td>
-                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                    <label class="switch-container" style="font-size: 0.75rem; display: flex; align-items: center; gap: 0.25rem;">
-                        <input type="checkbox" class="approve-toggle" data-uid="${res.uid}" ${res.approved ? 'checked' : ''}> Approved
-                    </label>
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    ${statusBadge}
                     <label class="switch-container" style="font-size: 0.75rem; display: flex; align-items: center; gap: 0.25rem;">
                         <input type="checkbox" class="feature-toggle" data-uid="${res.uid}" ${res.featured ? 'checked' : ''}> Featured
                     </label>
@@ -482,9 +486,18 @@ function renderBusinessesTable(businesses) {
             </td>
             <td>${res.menuCount}</td>
             <td>
-                <div style="display: flex; gap: 0.25rem;">
-                    <a href="menu.html?id=${res.uid}" target="_blank" class="btn btn-outline btn-small" title="View Public Menu">👁️</a>
-                    <button class="btn btn-outline btn-small view-details" data-uid="${res.uid}" title="View Details">📝</button>
+                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                    <div style="display: flex; gap: 0.25rem;">
+                        <a href="menu.html?id=${res.uid}" target="_blank" class="btn btn-outline btn-small" title="View Public Menu">👁️</a>
+                        <button class="btn btn-outline btn-small view-details" data-uid="${res.uid}" title="View Details">📝</button>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.25rem; margin-top: 0.25rem;">
+                        <button class="btn btn-primary btn-small verify-btn" data-uid="${res.uid}" ${res.verified ? 'disabled' : ''}>Verify Business</button>
+                        <div style="display: flex; gap: 0.25rem;">
+                            <button class="btn btn-outline btn-small approve-loc-btn" data-uid="${res.uid}" title="Approve Location">✅ Loc</button>
+                            <button class="btn btn-error btn-small reject-loc-btn" data-uid="${res.uid}" title="Reject Location">❌ Loc</button>
+                        </div>
+                    </div>
                 </div>
             </td>
         `;
@@ -493,20 +506,60 @@ function renderBusinessesTable(businesses) {
 
     document.getElementById('restaurants-page-info').innerText = `Total: ${businesses.length}`;
 
-    // Add event listeners for toggles
-    document.querySelectorAll('.approve-toggle').forEach(checkbox => {
-        checkbox.addEventListener('change', async (e) => {
-            const uid = e.target.getAttribute('data-uid');
-            const approved = e.target.checked;
-            try {
-                await updateDoc(doc(db, "businesses", uid), { approved, updatedAt: serverTimestamp() });
-            } catch (error) {
-                console.error("Error updating approval status:", error);
-                e.target.checked = !approved;
+    // Verification actions
+    document.querySelectorAll('.verify-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const uid = btn.getAttribute('data-uid');
+            if (confirm("Mark this business as verified?")) {
+                try {
+                    await updateDoc(doc(db, "businesses", uid), {
+                        verified: true,
+                        status: "verified",
+                        updatedAt: serverTimestamp()
+                    });
+                    loadBusinesses();
+                } catch (error) {
+                    console.error("Error verifying business:", error);
+                }
             }
         });
     });
 
+    document.querySelectorAll('.approve-loc-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const uid = btn.getAttribute('data-uid');
+            try {
+                await updateDoc(doc(db, "businesses", uid), {
+                    status: "pending", // Reset to pending if it was location_issue
+                    updatedAt: serverTimestamp()
+                });
+                alert("Location approved/reset to pending.");
+                loadBusinesses();
+            } catch (error) {
+                console.error("Error approving location:", error);
+            }
+        });
+    });
+
+    document.querySelectorAll('.reject-loc-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const uid = btn.getAttribute('data-uid');
+            if (confirm("Reject this location and mark as 'Needs Attention'?")) {
+                try {
+                    await updateDoc(doc(db, "businesses", uid), {
+                        status: "location_issue",
+                        verified: false,
+                        updatedAt: serverTimestamp()
+                    });
+                    loadBusinesses();
+                } catch (error) {
+                    console.error("Error rejecting location:", error);
+                }
+            }
+        });
+    });
+
+    // Add event listeners for toggles
     document.querySelectorAll('.feature-toggle').forEach(checkbox => {
         checkbox.addEventListener('change', async (e) => {
             const uid = e.target.getAttribute('data-uid');
@@ -553,16 +606,20 @@ async function loadDiagnostics() {
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             let mapStatus = "Visible";
-            if (!data.approved) {
-                mapStatus = "Awaiting Approval";
-            } else if (data.latitude === null || data.longitude === null || isNaN(data.latitude) || isNaN(data.longitude)) {
+
+            if (data.latitude === null || data.longitude === null || isNaN(data.latitude) || isNaN(data.longitude)) {
                 mapStatus = "Missing Coordinates";
+            } else if (data.status === "location_issue") {
+                mapStatus = "Needs Attention";
+            } else if (!data.verified) {
+                mapStatus = "Pending Verification";
             }
 
             diagnosticData.push({
                 uid: doc.id,
                 businessName: data.businessName || "N/A",
-                approved: data.approved || false,
+                verified: data.verified || false,
+                status: data.status || "pending",
                 latitude: data.latitude,
                 longitude: data.longitude,
                 mapStatus: mapStatus,
@@ -591,12 +648,12 @@ function renderDiagnosticTable(data) {
     data.forEach(biz => {
         const tr = document.createElement('tr');
         let statusBadgeClass = "badge-available"; // Visible
-        if (biz.mapStatus === "Awaiting Approval") statusBadgeClass = "badge-preview";
-        if (biz.mapStatus === "Missing Coordinates") statusBadgeClass = "badge-error";
+        if (biz.mapStatus === "Pending Verification") statusBadgeClass = "badge-preview";
+        if (biz.mapStatus === "Missing Coordinates" || biz.mapStatus === "Needs Attention") statusBadgeClass = "badge-error";
 
         tr.innerHTML = `
             <td><strong>${biz.businessName}</strong></td>
-            <td>${biz.approved ? '✅ Yes' : '❌ No'}</td>
+            <td>${biz.verified ? '✅ Yes' : '❌ No'}</td>
             <td>${biz.latitude !== null ? biz.latitude : '<span style="color:red;">NULL</span>'}</td>
             <td>${biz.longitude !== null ? biz.longitude : '<span style="color:red;">NULL</span>'}</td>
             <td><span class="badge ${statusBadgeClass}">${biz.mapStatus}</span></td>
