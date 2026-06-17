@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import firebaseConfig from "./firebase-config.js";
+import { COUNTRIES } from "./countries.js";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -8,7 +9,7 @@ const db = getFirestore(app);
 
 // Map State
 let map;
-let markers = [];
+let markerCluster;
 let businesses = [];
 
 // DOM Elements
@@ -56,12 +57,11 @@ async function fetchBusinesses() {
 }
 
 /**
- * Populate country dropdown with unique countries from data
+ * Populate country dropdown with all supported countries
  */
 function populateCountryFilter() {
-    const countries = [...new Set(businesses.map(b => b.country).filter(Boolean))].sort();
     countryFilter.innerHTML = '<option value="">All Countries</option>';
-    countries.forEach(country => {
+    COUNTRIES.forEach(country => {
         const option = document.createElement('option');
         option.value = country;
         option.textContent = country;
@@ -73,9 +73,12 @@ function populateCountryFilter() {
  * Render markers on the map
  */
 function renderMarkers(data) {
-    // Clear existing markers
-    markers.forEach(m => map.removeLayer(m));
-    markers = [];
+    // Clear existing clusters
+    if (markerCluster) {
+        map.removeLayer(markerCluster);
+    }
+
+    markerCluster = L.markerClusterGroup();
 
     // Custom Icons
     const greenIcon = new L.Icon({
@@ -121,7 +124,7 @@ function renderMarkers(data) {
                 statusClass = "status-verified";
             }
 
-            const marker = L.marker([biz.latitude, biz.longitude], { icon: icon }).addTo(map);
+            const marker = L.marker([biz.latitude, biz.longitude], { icon: icon });
 
             const popupContent = `
                 <div class="map-popup">
@@ -145,14 +148,15 @@ function renderMarkers(data) {
             `;
 
             marker.bindPopup(popupContent);
-            markers.push(marker);
+            markerCluster.addLayer(marker);
         }
     });
 
+    map.addLayer(markerCluster);
+
     // If data exists, adjust view
-    if (data.length > 0 && markers.length > 0) {
-        const group = new L.featureGroup(markers);
-        map.fitBounds(group.getBounds().pad(0.1));
+    if (data.length > 0) {
+        map.fitBounds(markerCluster.getBounds().pad(0.1));
     }
 }
 
