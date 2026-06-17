@@ -1,21 +1,32 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Admin helper function
+    // Role-based helper functions
     function isAdmin() {
       return request.auth != null &&
              exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    function isModerator() {
+      return request.auth != null &&
+             (exists(/databases/$(database)/documents/moderators/$(request.auth.uid)) || isAdmin());
+    }
+
     // Admin collection rules
     match /admins/{adminId} {
       allow read: if request.auth != null && (request.auth.uid == adminId || isAdmin());
-      allow write: if false; // Admins should be managed manually in Firebase Console as per instructions
+      allow write: if false;
+    }
+
+    // Moderator collection rules
+    match /moderators/{moderatorId} {
+      allow read: if request.auth != null && (request.auth.uid == moderatorId || isAdmin());
+      allow write: if isAdmin();
     }
 
     // User profile rules
     match /users/{userId} {
-      allow read: if (request.auth != null && request.auth.uid == userId) || isAdmin();
+      allow read: if (request.auth != null && request.auth.uid == userId) || isModerator();
 
       allow create: if request.auth != null && request.auth.uid == userId;
 
@@ -27,51 +38,54 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Restaurant profile rules
-    match /restaurants/{uid} {
-      // Allow public read access for menu display
-      allow read: if true || isAdmin();
+    // Business profile rules (replaces restaurants)
+    match /businesses/{uid} {
+      // Allow public read access for the map and menu display
+      allow read: if true;
 
-      // Allow create and update if the user is the owner
-      allow create, update: if request.auth != null && request.auth.uid == uid;
+      // Allow create if the user is authenticated and matches UID
+      allow create: if request.auth != null && request.auth.uid == uid;
+
+      // Allow update if owner OR moderator/admin
+      allow update: if (request.auth != null && request.auth.uid == uid &&
+                        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['approved', 'featured']))
+                    || (isModerator() &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['approved', 'featured']));
 
       // Allow delete if admin
+      allow delete: if isAdmin();
+    }
+
+    // Legacy Restaurant profile rules (kept for backward compatibility during migration)
+    match /restaurants/{uid} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == uid;
       allow delete: if isAdmin();
     }
 
     // Menu Category rules
     match /menuCategories/{categoryId} {
       allow create: if request.auth != null && request.resource.data.restaurantId == request.auth.uid;
-      allow read: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isAdmin();
+      allow read: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isModerator();
       allow update: if request.auth != null && resource.data.restaurantId == request.auth.uid;
-      allow delete: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isAdmin();
+      allow delete: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isModerator();
     }
 
     // Menu Item rules
     match /menuItems/{itemId} {
-      // Allow public read access for menu display
-      allow read: if true || isAdmin();
-
-      // Owner write access
+      allow read: if true;
       allow create: if request.auth != null && request.resource.data.restaurantId == request.auth.uid;
       allow update: if request.auth != null && resource.data.restaurantId == request.auth.uid;
-      allow delete: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isAdmin();
+      allow delete: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isModerator();
     }
 
     // Order rules
     match /orders/{orderId} {
-      // Anyone can create an order
       allow create: if true;
-
-      // Only the restaurant owner or an admin can read their orders
-      allow read: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isAdmin();
-
-      // Only the restaurant owner can update the status/updatedAt, or an admin can update anything
+      allow read: if (request.auth != null && resource.data.restaurantId == request.auth.uid) || isModerator();
       allow update: if (request.auth != null && resource.data.restaurantId == request.auth.uid &&
                         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']))
-                    || isAdmin();
-
-      // Only admins can delete orders
+                    || isModerator();
       allow delete: if isAdmin();
     }
   }

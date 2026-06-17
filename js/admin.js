@@ -65,8 +65,8 @@ async function init() {
     // Load Users
     loadUsers();
 
-    // Load Restaurants
-    loadRestaurants();
+    // Load Businesses
+    loadBusinesses();
 
     // Event Listeners for Search
     document.getElementById('user-search').addEventListener('input', debounce(() => {
@@ -76,7 +76,7 @@ async function init() {
 
     document.getElementById('restaurant-search').addEventListener('input', debounce(() => {
         restaurantsPage = 1;
-        loadRestaurants(document.getElementById('restaurant-search').value);
+        loadBusinesses(document.getElementById('restaurant-search').value);
     }, 500));
 
     // Event Listeners for Exports
@@ -132,7 +132,9 @@ async function executeUserDeletion() {
         // Delete user doc
         batch.delete(doc(db, "users", uid));
 
-        // Delete restaurant doc
+        // Delete business doc
+        batch.delete(doc(db, "businesses", uid));
+        // Also try legacy if it exists
         batch.delete(doc(db, "restaurants", uid));
 
         // Delete Menu Items
@@ -253,13 +255,13 @@ document.getElementById('confirm-subscription-btn').addEventListener('click', as
 async function loadStats() {
     try {
         const usersCount = await getCountFromServer(collection(db, "users"));
-        const restaurantsCount = await getCountFromServer(collection(db, "restaurants"));
+        const businessesCount = await getCountFromServer(collection(db, "businesses"));
         const menuItemsCount = await getCountFromServer(collection(db, "menuItems"));
 
         document.getElementById('total-users').innerText = usersCount.data().count;
-        document.getElementById('total-restaurants').innerText = restaurantsCount.data().count;
+        document.getElementById('total-restaurants').innerText = businessesCount.data().count;
         document.getElementById('total-menu-items').innerText = menuItemsCount.data().count;
-        document.getElementById('total-public-menus').innerText = restaurantsCount.data().count; // Assuming each restaurant has a menu
+        document.getElementById('total-public-menus').innerText = businessesCount.data().count;
     } catch (error) {
         console.error("Error loading stats:", error);
     }
@@ -277,10 +279,10 @@ async function loadUsers(searchTerm = "") {
 
         const querySnapshot = await getDocs(q);
 
-        // Fetch all restaurants to link with users
-        const restaurantDocs = await getDocs(collection(db, "restaurants"));
+        // Fetch all businesses to link with users
+        const businessDocs = await getDocs(collection(db, "businesses"));
         const restaurantMap = {};
-        restaurantDocs.forEach(doc => {
+        businessDocs.forEach(doc => {
             restaurantMap[doc.id] = doc.data();
         });
 
@@ -382,14 +384,14 @@ function renderUsersTable(users) {
 }
 
 /**
- * Load Restaurants Panel
+ * Load Businesses Panel
  */
-async function loadRestaurants(searchTerm = "") {
+async function loadBusinesses(searchTerm = "") {
     const tableBody = document.getElementById('restaurants-table-body');
-    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Loading restaurants...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading businesses...</td></tr>';
 
     try {
-        const q = query(collection(db, "restaurants"), orderBy("createdAt", "desc"));
+        const q = query(collection(db, "businesses"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
 
         // Fetch all users to get their plans
@@ -399,7 +401,7 @@ async function loadRestaurants(searchTerm = "") {
             userPlans[doc.id] = doc.data().plan || "preview";
         });
 
-        let restaurants = [];
+        let businesses = [];
 
         // Fetch all menu items to count them per restaurant
         const menuItemsSnapshot = await getDocs(collection(db, "menuItems"));
@@ -413,55 +415,70 @@ async function loadRestaurants(searchTerm = "") {
 
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            restaurants.push({
+            businesses.push({
                 uid: doc.id,
                 businessName: data.businessName || "N/A",
                 ownerName: data.ownerName || "N/A",
-                ownerEmail: "", // We'll need to link this from users if needed
                 plan: userPlans[doc.id] || "preview",
                 phone: data.phone || "N/A",
                 whatsapp: data.whatsapp || "N/A",
                 address: data.address || "N/A",
+                city: data.city || "N/A",
+                country: data.country || "N/A",
+                category: data.category || "N/A",
+                approved: data.approved || false,
+                featured: data.featured || false,
                 createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
                 menuCount: menuCounts[doc.id] || 0
             });
         });
 
         if (searchTerm) {
-            restaurants = restaurants.filter(r =>
+            businesses = businesses.filter(r =>
                 r.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                r.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+                r.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                r.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                r.country.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
-        restaurantsData = restaurants; // Save for export
-        renderRestaurantsTable(restaurants);
+        restaurantsData = businesses; // Save for export
+        renderBusinessesTable(businesses);
     } catch (error) {
-        console.error("Error loading restaurants:", error);
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error loading restaurants.</td></tr>';
+        console.error("Error loading businesses:", error);
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Error loading businesses.</td></tr>';
     }
 }
 
-function renderRestaurantsTable(restaurants) {
+function renderBusinessesTable(businesses) {
     const tableBody = document.getElementById('restaurants-table-body');
     tableBody.innerHTML = '';
 
-    if (restaurants.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No restaurants found.</td></tr>';
+    if (businesses.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No businesses found.</td></tr>';
         return;
     }
 
-    restaurants.forEach(res => {
+    businesses.forEach(res => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><strong>${res.businessName}</strong></td>
+            <td><strong>${res.businessName}</strong><br><small>${res.city}, ${res.country}</small></td>
             <td>${res.ownerName}</td>
             <td><span class="badge ${res.plan === 'pro' ? 'badge-featured' : ''}">${res.plan}</span></td>
-            <td>${res.phone}</td>
-            <td>${res.createdAt.toLocaleDateString()}</td>
+            <td>${res.category}</td>
+            <td>
+                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                    <label class="switch-container" style="font-size: 0.75rem; display: flex; align-items: center; gap: 0.25rem;">
+                        <input type="checkbox" class="approve-toggle" data-uid="${res.uid}" ${res.approved ? 'checked' : ''}> Approved
+                    </label>
+                    <label class="switch-container" style="font-size: 0.75rem; display: flex; align-items: center; gap: 0.25rem;">
+                        <input type="checkbox" class="feature-toggle" data-uid="${res.uid}" ${res.featured ? 'checked' : ''}> Featured
+                    </label>
+                </div>
+            </td>
             <td>${res.menuCount}</td>
             <td>
-                <div style="display: flex; gap: 0.5rem;">
+                <div style="display: flex; gap: 0.25rem;">
                     <a href="menu.html?id=${res.uid}" target="_blank" class="btn btn-outline btn-small" title="View Public Menu">👁️</a>
                     <button class="btn btn-outline btn-small view-details" data-uid="${res.uid}" title="View Details">📝</button>
                 </div>
@@ -470,7 +487,34 @@ function renderRestaurantsTable(restaurants) {
         tableBody.appendChild(tr);
     });
 
-    document.getElementById('restaurants-page-info').innerText = `Total: ${restaurants.length}`;
+    document.getElementById('restaurants-page-info').innerText = `Total: ${businesses.length}`;
+
+    // Add event listeners for toggles
+    document.querySelectorAll('.approve-toggle').forEach(checkbox => {
+        checkbox.addEventListener('change', async (e) => {
+            const uid = e.target.getAttribute('data-uid');
+            const approved = e.target.checked;
+            try {
+                await updateDoc(doc(db, "businesses", uid), { approved, updatedAt: serverTimestamp() });
+            } catch (error) {
+                console.error("Error updating approval status:", error);
+                e.target.checked = !approved;
+            }
+        });
+    });
+
+    document.querySelectorAll('.feature-toggle').forEach(checkbox => {
+        checkbox.addEventListener('change', async (e) => {
+            const uid = e.target.getAttribute('data-uid');
+            const featured = e.target.checked;
+            try {
+                await updateDoc(doc(db, "businesses", uid), { featured, updatedAt: serverTimestamp() });
+            } catch (error) {
+                console.error("Error updating featured status:", error);
+                e.target.checked = !featured;
+            }
+        });
+    });
 
     // Add event listeners for details
     document.querySelectorAll('.view-details').forEach(btn => {

@@ -32,7 +32,10 @@ export function initQRManager(uid, businessName, logoUrl = "") {
     currentUid = uid;
     currentBizName = businessName || "Restaurant";
     currentLogoUrl = logoUrl;
-    publicMenuUrl = `https://www.scanmenu.africa/menu.html?id=${uid}`;
+    // Keep it relative or dynamic for sandbox
+    const host = window.location.host;
+    const protocol = window.location.protocol;
+    publicMenuUrl = `${protocol}//${host}/menu.html?id=${uid}`;
 
     if (generateBtn) {
         generateBtn.addEventListener("click", handleGenerateQR);
